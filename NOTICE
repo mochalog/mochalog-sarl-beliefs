@@ -19,6 +19,41 @@ limitations under the License.
     ======= Third-Party Software used by Mochalog-Beliefs =======
     =============================================================
 
+======= SARL and Janus Platform =======
+
+This product uses  
+    - SARL (http://www.sarl.io/)
+        - Source available at https://github.com/sarl/sarl
+    - Janus Project (http://www.janusproject.io/)
+        - Source available at https://github.com/sarl/sarl/tree/master/sre/io.janusproject
+
+Copyright 2014-2017 the original authors or authors.
+SARL and Janus Project are licensed under the Apache License, Version 2.0.
+A copy of the full text of this license can be found at
+'thirdparty/sarl/LICENSE' (available on Github at
+https://github.com/mochalog/mochalog-beliefs/tree/master/thirdparty/sarl/LICENSE).
+
+======= Mochalog =======
+
+This product uses Mochalog (https://github.com/mochalog/mochalog).  
+
+Copyright 2017 The Mochalog Authors.
+Mochalog is licensed under the Apache License, Version 2.0.
+A copy of the full text of this license can be found at
+'thirdparty/mochalog/LICENSE' (available on Github at
+https://github.com/mochalog/mochalog-beliefs/tree/master/thirdparty/mochalog/LICENSE).
+
+======= Jitpack =======
+
+This product uses Jitpack (https://jitpack.io/).
+Source available at https://github.com/jitpack/jitpack.io.
+
+Copyright (c) 2014-2017 JitPack.io.
+JitPack is licensed under the MIT License.
+A copy of the full text of this license can be found at
+'thirdparty/jitpack/LICENSE' (available on Github at
+https://github.com/mochalog/mochalog-beliefs/tree/master/thirdparty/jitpack/LICENSE).
+
 ======= JUnit =======
 
 This product uses JUnit (http://junit.org/).
