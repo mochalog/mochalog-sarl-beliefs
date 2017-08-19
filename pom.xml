@@ -1,0 +1,103 @@
+<!--
+   Copyright 2017 The Mochalog-Beliefs Authors.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.mochalog</groupId>
+    <artifactId>io.mochalog.beliefs</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+
+    <!-- Mochalog-Beliefs properties -->
+    <properties>
+        <!-- SARL framework version and configuration -->
+        <sarl.version>0.5.7</sarl.version>
+
+        <compiler.level>1.8</compiler.level>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Janus project version -->
+        <janus.version>2.${sarl.version}</janus.version> 
+        
+        <!-- Mochalog framework version -->
+        <mochalog.version>f03a9d1</mochalog.version>
+    </properties>
+
+    <!-- Repository definitions -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven.sarl.io</id>
+            <name>SARL Maven Repository</name>
+            <url>http://maven.sarl.io/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+    
+    <repositories>
+        <repository>
+            <id>maven.sarl.io</id>
+            <name>SARL Maven Repository</name>
+            <url>http://maven.sarl.io/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- JitPack used for remote installation of dependencies from Github -->
+        <repository>
+            <id>jitpack.io</id>
+            <name>JitPack Repository</name>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <!-- Project dependencies -->
+    <dependencies>
+        <!-- Janus Project kernel (contains SARL language core) -->
+        <dependency>
+            <groupId>io.janusproject</groupId>
+            <artifactId>io.janusproject.kernel</artifactId>
+            <version>${janus.version}</version>
+        </dependency>
+        <!--  Mochalog interface for SWI-Prolog -->
+        <dependency>
+            <groupId>com.github.mochalog</groupId>
+            <artifactId>mochalog</artifactId>
+            <version>${mochalog.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!-- Build pipeline plugins -->
+    <build>
+        <plugins>
+            <plugin>
+                <!-- SARL Maven compiler plugin -->
+                <!-- Facilitate compilation of SARL source code to Java classes -->
+                <groupId>io.sarl.maven</groupId>
+                <artifactId>sarl-maven-plugin</artifactId>
+                <version>${sarl.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <source>${compiler.level}</source>
+                    <target>${compiler.level}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
