@@ -16,6 +16,8 @@
 
 package io.mochalog.sarl.beliefs
 
+import io.mochalog.bridge.prolog.query.Query
+
 import io.sarl.lang.core.Event
 
 /**
@@ -32,4 +34,12 @@ capacity Beliefs
      * @param <T> Event type to respond to
      */
     def onSensed(text : String, args : Object*) with T extends Event
+    
+    /**
+     * Compel an agent to query its beliefs in response
+     * to receiving a specified event
+     * @param query Query to perform
+     * @param <T> Event type to respond to
+     */
+    def onSensed(query : Query) with T extends Event
 }
