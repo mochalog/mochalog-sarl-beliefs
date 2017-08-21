@@ -1,5 +1,5 @@
 /**
- * Copyright 2017 The Mochalog-Beliefs Authors.
+ * Copyright 2017 The Mochalog-SARL-Beliefs Authors.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.mochalog.beliefs;
+package io.mochalog.sarl.beliefs;
 
 import io.mochalog.bridge.prolog.PrologContext;
 import io.mochalog.bridge.prolog.SandboxedPrologContext;

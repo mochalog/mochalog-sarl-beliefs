@@ -1,6 +1,6 @@
-## Mochalog-Beliefs Authors
+## Mochalog-SARL-Beliefs Authors
 
-For copyright purposes, **The Mochalog-Beliefs Authors** refers to all individuals listed below.
+For copyright purposes, **The Mochalog-SARL-Beliefs Authors** refers to all individuals listed below.
 Individual author listings should include Github alias linked to Github profile and email address.
 
 | Full Name               | Github Alias                                  | Email Address                               |

@@ -1,5 +1,5 @@
-Mochalog-Beliefs
-Copyright 2017 The Mochalog-Beliefs Authors.
+Mochalog-SARL-Beliefs
+Copyright 2017 The Mochalog-SARL-Beliefs Authors.
 See AUTHORS.md for a list of authors for which this copyright applies.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you 
@@ -15,9 +15,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-    =============================================================
-    ======= Third-Party Software used by Mochalog-Beliefs =======
-    =============================================================
+    ==================================================================
+    ======= Third-Party Software used by Mochalog-SARL-Beliefs =======
+    ==================================================================
 
 ======= SARL and Janus Platform =======
 
