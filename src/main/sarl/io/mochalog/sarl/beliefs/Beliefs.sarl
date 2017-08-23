@@ -29,17 +29,17 @@ capacity Beliefs
     /**
      * Compel an agent to query its beliefs in response
      * to receiving a specified event
-     * @param text Query to perform
+     * @param query Query to ask
      * @param args Arguments to format query with
      * @param <T> Event type to respond to
      */
-    def onSensed(text : String, args : Object*) with T extends Event
+    def askOn(query : String, args : Object*) with T extends Event
     
     /**
      * Compel an agent to query its beliefs in response
      * to receiving a specified event
-     * @param query Query to perform
+     * @param query Query to ask
      * @param <T> Event type to respond to
      */
-    def onSensed(query : Query) with T extends Event
+    def askOn(query : Query) with T extends Event
 }

@@ -29,8 +29,7 @@ import io.sarl.lang.annotation.PerceptGuardEvaluator;
 import io.sarl.lang.util.ClearableReference;
 
 import io.sarl.core.Behaviors;
-
-import io.janusproject.kernel.bic.InternalEventBusCapacity;
+import io.sarl.core.Schedules;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -85,10 +84,10 @@ public class SelfBeliefs extends Skill implements Beliefs
     // Interface to Prolog knowledge base
     private PrologContext knowledgeBase;
 
-    // Buffered reference to built-in InternalEventBusCapacity skill
-    private ClearableReference<Skill> bufferedInternalEventBusSkill;
     // Buffered reference to built-in Behaviors skill
     private ClearableReference<Skill> bufferedBehaviorsSkill;
+    // Buffered reference to built-in Behaviors skill
+    private ClearableReference<Skill> bufferedSchedulesSkill;
 
     /**
      * Constructor.
@@ -121,13 +120,13 @@ public class SelfBeliefs extends Skill implements Beliefs
     }
 
     @Override
-    public <T extends Event> void onSensed(String text, Object... args)
+    public <T extends Event> void askOn(String query, Object... args)
     {
-        onSensed(Query.format(text, args));
+        askOn(Query.format(query, args));
     }
 
     @Override
-    public <T extends Event> void onSensed(Query query)
+    public <T extends Event> void askOn(Query query)
     {
         // Bind the given event type to a belief query behavior
         Behavior eventBoundBeliefQuery = new EventBoundBeliefQuery<T>(getOwner(), query);
@@ -139,21 +138,6 @@ public class SelfBeliefs extends Skill implements Beliefs
     // BIC skill implementations in Janus runtime available at
     // https://github.com/sarl/sarl/blob/master/sre/
     // io.janusproject/io.janusproject.plugin/src/io/janusproject/kernel/bic
-
-    /**
-     * Fetch the attached InternalEventBusCapacity skill
-     * @return InternalEventBusCapacity skill
-     */
-    protected final InternalEventBusCapacity getInternalEventBusCapacitySkill()
-    {
-        if (this.bufferedInternalEventBusSkill == null || this.bufferedInternalEventBusSkill.get() == null)
-        {
-            // Cache the skill for faster access later
-            this.bufferedInternalEventBusSkill = $getSkill(InternalEventBusCapacity.class);
-        }
-
-        return $castSkill(InternalEventBusCapacity.class, this.bufferedInternalEventBusSkill);
-    }
 
     /**
      * Fetch the attached Behaviors skill
@@ -168,5 +152,20 @@ public class SelfBeliefs extends Skill implements Beliefs
         }
 
         return $castSkill(Behaviors.class, this.bufferedBehaviorsSkill);
+    }
+    
+    /**
+     * Fetch the attached Schedules skill
+     * @return Schedules skill
+     */
+    protected final Schedules getSchedulesSkill()
+    {
+        if (this.bufferedSchedulesSkill == null || this.bufferedSchedulesSkill.get() == null)
+        {
+            // Cache the skill for faster access later
+            this.bufferedSchedulesSkill = $getSkill(Schedules.class);
+        }
+
+        return $castSkill(Schedules.class, this.bufferedSchedulesSkill);
     }
 }
