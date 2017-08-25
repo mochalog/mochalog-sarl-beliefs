@@ -19,6 +19,8 @@ package io.mochalog.sarl.beliefs;
 import io.mochalog.bridge.prolog.PrologContext;
 import io.mochalog.bridge.prolog.SandboxedPrologContext;
 import io.mochalog.bridge.prolog.query.Query;
+import io.mochalog.bridge.prolog.query.QuerySolution;
+import io.mochalog.bridge.prolog.query.QuerySolutionList;
 
 import io.sarl.lang.core.Agent;
 import io.sarl.lang.core.Behavior;
@@ -30,6 +32,9 @@ import io.sarl.lang.util.ClearableReference;
 
 import io.sarl.core.Behaviors;
 import io.sarl.core.Schedules;
+
+import java.io.IOException;
+import java.nio.file.Path;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -68,7 +73,7 @@ public class SelfBeliefs extends Skill implements Beliefs
         public void onEventGuard(final T event, Collection<Runnable> handlers)
         {
             // Asynchronously perform a Prolog query
-            handlers.add(() -> knowledgeBase.prove(query));
+            handlers.add(() -> believes(query));
         }
 
         /**
@@ -119,6 +124,73 @@ public class SelfBeliefs extends Skill implements Beliefs
         knowledgeBase = new SandboxedPrologContext(module);
     }
 
+    @Override
+    public boolean load(Path path)
+    {
+        try
+        {
+            return knowledgeBase.loadFile(path);
+        }
+        catch (IOException e)
+        {
+            return false;
+        }
+    }
+    
+    @Override
+    public boolean adopt(String belief, Object... args)
+    {
+        return knowledgeBase.assertLast(belief, args);
+    }
+    
+    @Override
+    public boolean renounce(String belief, Object... args)
+    {
+        return knowledgeBase.retract(belief, args);
+    }
+    
+    @Override
+    public boolean renounceAll(String belief, Object... args)
+    {
+        return knowledgeBase.retractAll(belief, args);
+    }
+    
+    @Override
+    public boolean believes(String query, Object... args)
+    {
+        return knowledgeBase.prove(query, args);
+    }
+
+    @Override
+    public boolean believes(Query query)
+    {
+        return knowledgeBase.prove(query);
+    }
+
+    @Override
+    public QuerySolution ask(String query, Object... args)
+    {
+        return knowledgeBase.askForSolution(query, args);
+    }
+
+    @Override
+    public QuerySolution ask(Query query)
+    {
+        return knowledgeBase.askForSolution(query);
+    }
+
+    @Override
+    public QuerySolutionList askAll(String query, Object... args)
+    {
+        return knowledgeBase.askForAllSolutions(query, args);
+    }
+
+    @Override
+    public QuerySolutionList askAll(Query query)
+    {
+        return knowledgeBase.askForAllSolutions(query);
+    }
+    
     @Override
     public <T extends Event> void askOn(String query, Object... args)
     {

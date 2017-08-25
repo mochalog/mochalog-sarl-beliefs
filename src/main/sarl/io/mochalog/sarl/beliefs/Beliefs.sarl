@@ -17,26 +17,116 @@
 package io.mochalog.sarl.beliefs
 
 import io.mochalog.bridge.prolog.query.Query
+import io.mochalog.bridge.prolog.query.QuerySolution
+import io.mochalog.bridge.prolog.query.QuerySolutionList
+import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
 
 import io.sarl.lang.core.Event
 
+import java.nio.file.Path
+
 /**
  * Capacity allowing an agent to reason about
- * its currently-held beliefs in a declarative format
+ * its currently held beliefs in a declarative format
  */
 capacity Beliefs
 {
     /**
-     * Compel an agent to query its beliefs in response
-     * to receiving a specified event
+     * Import the knowledge base stored at the given
+     * file paths into the current knowledge base
+     * @param paths File path
+     * @return True if import succeeded, false otherwise.
+     */
+    def load(path : Path) : boolean
+    
+    /**
+     * Add a new belief to the knowledge base
+     * @param belief Belief to add
+     * @param args Arguments to format belief with
+     * @return True if belief was adopted successfully,
+     * false otherwise.
+     */
+    def adopt(belief : String, args : Object*) : boolean
+    
+    /**
+     * Remove the first matching belief from the knowledge base
+     * @param belief Belief to remove
+     * @param args Arguments to format belief with
+     * @return True if belief was renounced successfully,
+     * false otherwise.
+     */
+    def renounce(belief : String, args : Object*) : boolean
+    
+    /**
+     * Remove all matching beliefs from the knowledge base
+     * @param belief Belief definition for which all matching
+     * beliefs should be removed
+     * @param args Arguments to format belief with
+     * @return True if belief definition was renounced
+     * successfully, false otherwise.
+     */
+    def renounceAll(belief : String, args : Object*) : boolean
+    
+    /**
+     * Ask if query is satisfied by agent knowledge base
+     * @param query Unformatted query to ask
+     * @param args Arguments to format query with
+     * @return True if query satisfied, false otherwise.
+     */
+    def believes(query : String, args : Object*) : boolean
+    
+    /**
+     * Ask if query is satisfied by agent knowledge base
      * @param query Query to ask
+     * @return True if query satisfied, false otherwise.
+     */
+    def believes(query : Query) : boolean
+    
+    /**
+     * Ask for first belief which satisfies query
+     * @param query Unformatted query to ask
+     * @param args Arguments to format query with
+     * @return Agent belief
+     * @throws NoSuchSolutionException Query unsatisfied by agent knowledge base
+     */
+    def ask(query : String, args : Object*) : QuerySolution 
+        throws NoSuchSolutionException
+    
+    /**
+     * Ask for first belief which satisfies query
+     * @param query Query to ask
+     * @return Agent belief
+     * @throws NoSuchSolutionException Query unsatisfied by agent knowledge base
+     */
+    def ask(query : Query) : QuerySolution 
+        throws NoSuchSolutionException
+    
+    /**
+     * Ask for all beliefs which satisfy query
+     * @param query Unformatted query to ask
+     * @param args Arguments to format query with
+     * @return Agent belief list
+     */
+    def askAll(query : String, args : Object*) : QuerySolutionList
+    
+    /**
+     * Ask for all beliefs which satisfy query
+     * @param query Query to ask
+     * @return Agent belief list
+     */
+    def askAll(query : Query) : QuerySolutionList
+    
+    /**
+     * Compel agent to query its beliefs in response
+     * to receiving a specified event
+     * @param query Unformatted query to ask
      * @param args Arguments to format query with
      * @param <T> Event type to respond to
      */
     def askOn(query : String, args : Object*) with T extends Event
     
     /**
-     * Compel an agent to query its beliefs in response
+     * Compel agent to query its beliefs in response
      * to receiving a specified event
      * @param query Query to ask
      * @param <T> Event type to respond to
