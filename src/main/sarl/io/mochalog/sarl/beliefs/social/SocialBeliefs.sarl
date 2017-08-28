@@ -149,5 +149,6 @@ capacity SocialBeliefs
      * @param plan Plan to enact if any knowledge base
      * entails the query
      */
-    def ifBelievedByNone(^space : Space, query : BeliefQuery, plan : () => void)    
+    def ifBelievedByNone(^space : Space, query : BeliefQuery, timeout : long = 1000,
+        plan : () => void)    
 }
