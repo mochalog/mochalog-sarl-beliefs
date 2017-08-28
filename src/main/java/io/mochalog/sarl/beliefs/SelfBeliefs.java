@@ -16,9 +16,10 @@
 
 package io.mochalog.sarl.beliefs;
 
+import io.mochalog.sarl.beliefs.query.BeliefQuery;
+
 import io.mochalog.bridge.prolog.PrologContext;
 import io.mochalog.bridge.prolog.SandboxedPrologContext;
-import io.mochalog.bridge.prolog.query.Query;
 import io.mochalog.bridge.prolog.query.QuerySolution;
 import io.mochalog.bridge.prolog.query.QuerySolutionList;
 
@@ -51,14 +52,14 @@ public class SelfBeliefs extends Skill implements Beliefs
     private class EventBoundBeliefQuery<T extends Event> extends Behavior
     {
         // Query to perform
-        private Query query;
+        private BeliefQuery query;
 
         /**
          * Constructor.
          * @param agent Owner agent
          * @param query Query to perform
          */
-        public EventBoundBeliefQuery(Agent agent, Query query)
+        public EventBoundBeliefQuery(Agent agent, BeliefQuery query)
         {
             super(agent);
             setQuery(query);
@@ -80,7 +81,7 @@ public class SelfBeliefs extends Skill implements Beliefs
          * Set the Prolog query to perform on event
          * @param query Query to perform
          */
-        public void setQuery(Query query)
+        public void setQuery(BeliefQuery query)
         {
             this.query = query;
         }
@@ -162,9 +163,9 @@ public class SelfBeliefs extends Skill implements Beliefs
     }
 
     @Override
-    public boolean believes(Query query)
+    public boolean believes(BeliefQuery query)
     {
-        return knowledgeBase.prove(query);
+        return knowledgeBase.prove(query.unboxedQuery);
     }
 
     @Override
@@ -174,9 +175,9 @@ public class SelfBeliefs extends Skill implements Beliefs
     }
 
     @Override
-    public QuerySolution ask(Query query)
+    public QuerySolution ask(BeliefQuery query)
     {
-        return knowledgeBase.askForSolution(query);
+        return knowledgeBase.askForSolution(query.unboxedQuery);
     }
 
     @Override
@@ -186,19 +187,19 @@ public class SelfBeliefs extends Skill implements Beliefs
     }
 
     @Override
-    public QuerySolutionList askAll(Query query)
+    public QuerySolutionList askAll(BeliefQuery query)
     {
-        return knowledgeBase.askForAllSolutions(query);
+        return knowledgeBase.askForAllSolutions(query.unboxedQuery);
     }
     
     @Override
     public <T extends Event> void askOn(String query, Object... args)
     {
-        askOn(Query.format(query, args));
+        askOn(new BeliefQuery(query, args));
     }
 
     @Override
-    public <T extends Event> void askOn(Query query)
+    public <T extends Event> void askOn(BeliefQuery query)
     {
         // Bind the given event type to a belief query behavior
         Behavior eventBoundBeliefQuery = new EventBoundBeliefQuery<T>(getOwner(), query);

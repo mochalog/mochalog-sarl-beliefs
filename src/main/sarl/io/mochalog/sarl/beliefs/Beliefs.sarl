@@ -16,7 +16,8 @@
 
 package io.mochalog.sarl.beliefs
 
-import io.mochalog.bridge.prolog.query.Query
+import io.mochalog.sarl.beliefs.query.BeliefQuery
+
 import io.mochalog.bridge.prolog.query.QuerySolution
 import io.mochalog.bridge.prolog.query.QuerySolutionList
 import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
@@ -80,7 +81,7 @@ capacity Beliefs
      * @param query Query to ask
      * @return True if query satisfied, false otherwise.
      */
-    def believes(query : Query) : boolean
+    def believes(query : BeliefQuery) : boolean
     
     /**
      * Ask for first belief which satisfies query
@@ -98,7 +99,7 @@ capacity Beliefs
      * @return Agent belief
      * @throws NoSuchSolutionException Query unsatisfied by agent knowledge base
      */
-    def ask(query : Query) : QuerySolution 
+    def ask(query : BeliefQuery) : QuerySolution 
         throws NoSuchSolutionException
     
     /**
@@ -114,7 +115,7 @@ capacity Beliefs
      * @param query Query to ask
      * @return Agent belief list
      */
-    def askAll(query : Query) : QuerySolutionList
+    def askAll(query : BeliefQuery) : QuerySolutionList
     
     /**
      * Compel agent to query its beliefs in response
@@ -131,5 +132,5 @@ capacity Beliefs
      * @param query Query to ask
      * @param <T> Event type to respond to
      */
-    def askOn(query : Query) with T extends Event
+    def askOn(query : BeliefQuery) with T extends Event
 }
