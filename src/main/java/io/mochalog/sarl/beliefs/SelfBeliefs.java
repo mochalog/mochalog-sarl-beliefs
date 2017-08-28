@@ -165,7 +165,7 @@ public class SelfBeliefs extends Skill implements Beliefs
     @Override
     public boolean believes(BeliefQuery query)
     {
-        return knowledgeBase.prove(query.unboxedQuery);
+        return knowledgeBase.prove(query.queryToAsk);
     }
 
     @Override
@@ -177,7 +177,7 @@ public class SelfBeliefs extends Skill implements Beliefs
     @Override
     public QuerySolution ask(BeliefQuery query)
     {
-        return knowledgeBase.askForSolution(query.unboxedQuery);
+        return knowledgeBase.askForSolution(query.queryToAsk);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class SelfBeliefs extends Skill implements Beliefs
     @Override
     public QuerySolutionList askAll(BeliefQuery query)
     {
-        return knowledgeBase.askForAllSolutions(query.unboxedQuery);
+        return knowledgeBase.askForAllSolutions(query.queryToAsk);
     }
     
     @Override

@@ -21,32 +21,31 @@ import io.mochalog.bridge.prolog.query.Query
 /** 
  * Event-compatible wrapper of the Mochalog Query
  * object, allowing queries to be conveniently passed
- * amongst agents
+ * amongst agents.
  */
 public event BeliefQuery
 {
-    // Internal Prolog query to be asked of a given
-    // knowledge base
-    public val unboxedQuery : Query
+    // Mochalog Query being asked
+    public val queryToAsk : Query
     
     /**
      * Constructor.
-     * @param text Unformatted query text
+     * @param queryToAsk Query intended to be asked
      * @param args Arguments to format query with
      */
-    public new(text : String, args : Object*)
+    public new(queryToAsk : String, args : Object*)
     {
         this(
-            Query.format(text, args)
+            Query.format(queryToAsk, args)
         )
     }
     
     /**
      * Constructor.
-     * @param query Query to ask
+     * @param queryToAsk Query intended to be asked
      */
-    public new(query : Query)
+    public new(queryToAsk : Query)
     {
-        unboxedQuery = query
+       this.queryToAsk = queryToAsk
     }
 }

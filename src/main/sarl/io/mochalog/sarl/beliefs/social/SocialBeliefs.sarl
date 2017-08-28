@@ -1,0 +1,153 @@
+/**
+ * Copyright 2017 The Mochalog-SARL-Beliefs Authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.mochalog.sarl.beliefs.social
+
+import io.mochalog.sarl.beliefs.query.BeliefQuery
+
+import io.sarl.lang.core.Agent
+import io.sarl.lang.core.Space
+
+/** 
+ * Capacity facilitating social interaction between
+ * agents by providing means of asking declarative 
+ * questions of each other about beliefs and answering.
+ */
+capacity SocialBeliefs
+{
+    /**
+     * Ask a query of the given agent.
+     * @param agent Agent to question
+     * @param query Query to ask
+     * @param args Arguments to format query with
+     */
+    def ask(^agent : Agent, query : String, args : Object*)
+
+    /**
+     * Ask a query of the given agent.
+     * @param agent Agent to question
+     * @param query Query to ask
+     */
+    def ask(^agent : Agent, query : BeliefQuery)
+    
+    /**
+     * Ask a query of all members of a given space.
+     * @param space Space to ask question in
+     * @param query Query to ask
+     * @param args Arguments to format query with
+     */
+    def askInSpace(^space : Space, query : String, args : Object*)
+    
+    /**
+     * Ask a query of all members of a given space.
+     * @param space Space to ask question in
+     * @param query Query to ask
+     */
+    def askInSpace(^space : Space, query : BeliefQuery)
+    
+    /**
+     * Tell a given agent about a belief
+     * that is entailed by one's knowledge base.
+     * @param agent Agent to disclose to
+     * @param disclosure Disclosure of beliefs
+     */
+    def tell(^agent : Agent, disclosure : BeliefDisclosure)
+    
+    /**
+     * Tell all members of a given space about a belief
+     * that is entailed by one's knowledge base.
+     * @param space Space to disclose in
+     * @param disclosure Disclosure of beliefs
+     */
+    def tellInSpace(^space : Space, disclosure : BeliefDisclosure)
+    
+    /**
+     * Directly answer a given query.
+     * @param query Query to answer
+     * @param disclosure Disclosure of beliefs
+     */
+    def answer(query : BeliefQuery, disclosure : BeliefDisclosure)
+    
+    /**
+     * Enact a plan given the knowledge base of the
+     * given agent entails the specified query.
+     * <p>
+     * Given a non-answer following elapse of the
+     * timeout, assumption is made that the query
+     * is not entailed (plan fails).
+     * @param agent Agent to question
+     * @param query Query to ask
+     * @param timeout Time to wait for responses in ms
+     * (defaults to 1000)
+     * @param plan Plan to enact if the knowledge base
+     * entails the query
+     */
+    def ifBelieves(^agent : Agent, query : BeliefQuery, timeout : long = 1000, 
+        plan : (Agent) => void)
+    
+    /**
+     * Enact a plan given all agents in a space
+     * possess knowledge bases which entail the specified
+     * query.
+     * <p>
+     * If not all responses have been received before the
+     * timeout has elapsed, assumption is made that the
+     * query is not believed by all (plan fails).
+     * @param space Space to ask question in
+     * @param query Query to ask
+     * @param timeout Time to wait for responses in ms
+     * (defaults to 1000)
+     * @param plan Plan to enact if all knowledge bases
+     * entail the query
+     */
+    def ifBelievedByAll(^space : Space, query : BeliefQuery, timeout : long = 1000, 
+        plan : () => void)
+        
+    /**
+     * Enact a plan given at least one agent in a space
+     * possesses a knowledge base which entails the specified
+     * query.
+     * <p>
+     * If no positive responses have been received before the
+     * timeout has elapsed, assumption is made that no agents
+     * believe the query (plan fails).
+     * @param space Space to ask question in
+     * @param query Query to ask
+     * @param timeout Time to wait for responses in ms
+     * (defaults to 1000)
+     * @param plan Plan to enact if any knowledge base
+     * entails the query
+     */
+    def ifBelievedByAny(^space : Space, query : BeliefQuery, timeout : long = 1000,
+        plan : () => void)
+        
+    /**
+     * Enact a plan given no agents in the space
+     * possess a knowledge base which entails the specified
+     * query.
+     * <p>
+     * Plan is only enacted given negative responses are sent
+     * from all agents within the timeout period (otherwise
+     * plan fails).
+     * @param space Space to ask question in
+     * @param query Query to ask
+     * @param timeout Time to wait for responses in ms
+     * (defaults to 1000)
+     * @param plan Plan to enact if any knowledge base
+     * entails the query
+     */
+    def ifBelievedByNone(^space : Space, query : BeliefQuery, plan : () => void)    
+}
