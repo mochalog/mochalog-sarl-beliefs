@@ -18,8 +18,11 @@ package io.mochalog.sarl.beliefs.social
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery
 
-import io.sarl.lang.core.Agent
-import io.sarl.lang.core.Space
+import io.sarl.lang.core.Address
+import io.sarl.lang.core.EventSpace
+import io.sarl.lang.core.Scope
+
+import io.sarl.util.Scopes
 
 /** 
  * Capacity facilitating social interaction between
@@ -29,50 +32,33 @@ import io.sarl.lang.core.Space
 capacity SocialBeliefs
 {
     /**
-     * Ask a query of the given agent.
-     * @param agent Agent to question
+     * Ask a query inside a space.
+     * @param space Space to ask question in
+     * @param scope Scope of the query (specification of receivers of query)
      * @param query Query to ask
      * @param args Arguments to format query with
      */
-    def ask(^agent : Agent, query : String, args : Object*)
+    def askIn(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants, 
+        query : String, args : Object*)
+    
+    /**
+     * Ask a query inside a space.
+     * @param space Space to ask question in
+     * @param scope Scope of the query (specification of receivers of query)
+     * @param query Query to ask
+     */
+    def askIn(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants, 
+        query : BeliefQuery)
 
     /**
-     * Ask a query of the given agent.
-     * @param agent Agent to question
-     * @param query Query to ask
-     */
-    def ask(^agent : Agent, query : BeliefQuery)
-    
-    /**
-     * Ask a query of all members of a given space.
-     * @param space Space to ask question in
-     * @param query Query to ask
-     * @param args Arguments to format query with
-     */
-    def askInSpace(^space : Space, query : String, args : Object*)
-    
-    /**
-     * Ask a query of all members of a given space.
-     * @param space Space to ask question in
-     * @param query Query to ask
-     */
-    def askInSpace(^space : Space, query : BeliefQuery)
-    
-    /**
-     * Tell a given agent about a belief
-     * that is entailed by one's knowledge base.
-     * @param agent Agent to disclose to
-     * @param disclosure Disclosure of beliefs
-     */
-    def tell(^agent : Agent, disclosure : BeliefDisclosure)
-    
-    /**
-     * Tell all members of a given space about a belief
+     * Tell members of a given space about a belief
      * that is entailed by one's knowledge base.
      * @param space Space to disclose in
+     * @param scope Scope of the disclosure (specification of receivers of disclosure)
      * @param disclosure Disclosure of beliefs
      */
-    def tellInSpace(^space : Space, disclosure : BeliefDisclosure)
+    def tellIn(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants,
+        disclosure : BeliefDisclosure)
     
     /**
      * Directly answer a given query.
@@ -80,23 +66,6 @@ capacity SocialBeliefs
      * @param disclosure Disclosure of beliefs
      */
     def answer(query : BeliefQuery, disclosure : BeliefDisclosure)
-    
-    /**
-     * Enact a plan given the knowledge base of the
-     * given agent entails the specified query.
-     * <p>
-     * Given a non-answer following elapse of the
-     * timeout, assumption is made that the query
-     * is not entailed (plan fails).
-     * @param agent Agent to question
-     * @param query Query to ask
-     * @param timeout Time to wait for responses in ms
-     * (defaults to 1000)
-     * @param plan Plan to enact if the knowledge base
-     * entails the query
-     */
-    def ifBelieves(^agent : Agent, query : BeliefQuery, timeout : long = 1000, 
-        plan : (Agent) => void)
     
     /**
      * Enact a plan given all agents in a space
@@ -107,14 +76,15 @@ capacity SocialBeliefs
      * timeout has elapsed, assumption is made that the
      * query is not believed by all (plan fails).
      * @param space Space to ask question in
+     * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
      * (defaults to 1000)
      * @param plan Plan to enact if all knowledge bases
      * entail the query
      */
-    def ifBelievedByAll(^space : Space, query : BeliefQuery, timeout : long = 1000, 
-        plan : () => void)
+    def ifBelievedByAll(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants,
+        query : BeliefQuery, timeout : long = 1000, plan : () => void)
         
     /**
      * Enact a plan given at least one agent in a space
@@ -125,14 +95,15 @@ capacity SocialBeliefs
      * timeout has elapsed, assumption is made that no agents
      * believe the query (plan fails).
      * @param space Space to ask question in
+     * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
      * (defaults to 1000)
      * @param plan Plan to enact if any knowledge base
      * entails the query
      */
-    def ifBelievedByAny(^space : Space, query : BeliefQuery, timeout : long = 1000,
-        plan : () => void)
+    def ifBelievedByAny(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants,
+        query : BeliefQuery, timeout : long = 1000, plan : () => void)
         
     /**
      * Enact a plan given no agents in the space
@@ -143,12 +114,13 @@ capacity SocialBeliefs
      * from all agents within the timeout period (otherwise
      * plan fails).
      * @param space Space to ask question in
+     * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
      * (defaults to 1000)
      * @param plan Plan to enact if any knowledge base
      * entails the query
      */
-    def ifBelievedByNone(^space : Space, query : BeliefQuery, timeout : long = 1000,
-        plan : () => void)    
+    def ifBelievedByNone(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants,
+        query : BeliefQuery, timeout : long = 1000, plan : () => void) 
 }
