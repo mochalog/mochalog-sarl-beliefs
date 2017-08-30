@@ -38,7 +38,7 @@ capacity SocialBeliefs
      * @param query Query to ask
      * @param args Arguments to format query with
      */
-    def askIn(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants, 
+    def askIn(^space : EventSpace, scope : Scope<Address> = null, 
         query : String, args : Object*)
     
     /**
@@ -47,7 +47,7 @@ capacity SocialBeliefs
      * @param scope Scope of the query (specification of receivers of query)
      * @param query Query to ask
      */
-    def askIn(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants, 
+    def askIn(^space : EventSpace, scope : Scope<Address> = null, 
         query : BeliefQuery)
 
     /**
@@ -57,7 +57,7 @@ capacity SocialBeliefs
      * @param scope Scope of the disclosure (specification of receivers of disclosure)
      * @param disclosure Disclosure of beliefs
      */
-    def tellIn(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants,
+    def tellIn(^space : EventSpace, scope : Scope<Address> = null,
         disclosure : BeliefDisclosure)
     
     /**
@@ -83,7 +83,7 @@ capacity SocialBeliefs
      * @param plan Plan to enact if all knowledge bases
      * entail the query
      */
-    def ifBelievedByAll(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants,
+    def ifBelievedByAll(^space : EventSpace, scope : Scope<Address> = null,
         query : BeliefQuery, timeout : long = 1000, plan : () => void)
         
     /**
@@ -102,7 +102,7 @@ capacity SocialBeliefs
      * @param plan Plan to enact if any knowledge base
      * entails the query
      */
-    def ifBelievedByAny(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants,
+    def ifBelievedByAny(^space : EventSpace, scope : Scope<Address> = null,
         query : BeliefQuery, timeout : long = 1000, plan : () => void)
         
     /**
@@ -121,6 +121,6 @@ capacity SocialBeliefs
      * @param plan Plan to enact if any knowledge base
      * entails the query
      */
-    def ifBelievedByNone(^space : EventSpace, scope : Scope<Address> = Scopes.<Address>allParticipants,
+    def ifBelievedByNone(^space : EventSpace, scope : Scope<Address> = null,
         query : BeliefQuery, timeout : long = 1000, plan : () => void) 
 }
