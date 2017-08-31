@@ -43,7 +43,7 @@ import java.util.UUID;
 /**
  * Skill allowing for management of knowledge base constrained to single agent
  */
-public class SelfBeliefs extends Skill implements Beliefs
+public class BasicBeliefIntrospection extends Skill implements SelfBeliefs
 {
     /**
      * Behavior allowing for the hooking of a belief query to a given SARL event
@@ -99,7 +99,7 @@ public class SelfBeliefs extends Skill implements Beliefs
      * Constructor.
      * @param id ID to assign to knowledge base
      */
-    public SelfBeliefs(UUID id)
+    public BasicBeliefIntrospection(UUID id)
     {
         super();
         initialiseKnowledgeBase(id);
@@ -109,7 +109,7 @@ public class SelfBeliefs extends Skill implements Beliefs
      * Constructor.
      * @param agent Owner agent
      */
-    public SelfBeliefs(Agent agent)
+    public BasicBeliefIntrospection(Agent agent)
     {
         super(agent);
         initialiseKnowledgeBase(agent.getID());

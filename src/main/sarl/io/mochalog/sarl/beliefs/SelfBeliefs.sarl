@@ -30,7 +30,7 @@ import java.nio.file.Path
  * Capacity allowing an agent to reason about
  * its currently held beliefs in a declarative format
  */
-capacity Beliefs
+capacity SelfBeliefs
 {
     /**
      * Import the knowledge base stored at the given
