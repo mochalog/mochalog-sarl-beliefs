@@ -27,15 +27,23 @@ import io.sarl.lang.core.Skill;
 import io.sarl.lang.core.SpaceID;
 
 import io.sarl.lang.util.ClearableReference;
+import io.sarl.lang.util.SynchronizedSet;
 
 import io.sarl.core.ExternalContextAccess;
+import io.sarl.util.OpenEventSpace;
 import io.sarl.util.Scopes;
+
+import java.util.UUID;
+
+import org.eclipse.xtext.xbase.lib.Functions.Function2;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure0;
+import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 /**
  * Skill allowing for basic belief-reasoning interactions with 
  * other agents in a multi-agent domain.
  */
-public abstract class BasicBeliefSocialisation extends Skill implements SocialBeliefs
+public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
 {
     // Buffered reference to built-in ExternalContextAccess skill
     private ClearableReference<Skill> bufferedExternalContextAccessSkill;
@@ -69,7 +77,62 @@ public abstract class BasicBeliefSocialisation extends Skill implements SocialBe
         
         setSourceToMe(disclosure, querySpace);
         // Tell the source agent the belief answer
-        tellIn(querySpace,  Scopes.addresses(querySource), disclosure);
+        tellIn(querySpace, Scopes.addresses(querySource), disclosure);
+    }
+
+    @Override
+    public void isBelievedByAll(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
+        Procedure1<? super Boolean> plan)
+    {
+        SynchronizedSet<UUID> participants = space.getParticipants();
+        
+        // Conduct social experiment, evaluating based on whether
+        // query is believed by all participants
+        conductSocialExperiment(space, scope, query, 
+            (experiment, disclosure) ->
+            {
+                if (disclosure.isBelieved)
+                {
+                    // Belief of the query is supporting evidence
+                    // towards hypothesis that all believe
+                    experiment.addPositiveResponse(disclosure);
+                    
+                    // Experiment should only continue given we have not
+                    // received positive responses from all participants yet
+                    SynchronizedSet<UUID> positiveResponders = experiment.getPositiveResponders();
+                    if (!positiveResponders.equals(participants))
+                    {
+                        return true;
+                    }
+                }
+                
+                // Experiment is concluded, deploy the plan
+                // with the experiment result
+                plan.apply(disclosure.isBelieved);
+                return false;
+            }
+        );
+    }
+    
+    @Override
+    public void isBelievedByAny(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
+            Procedure1<? super Boolean> plan)
+    {
+    }
+
+    @Override
+    public void isBelievedByNone(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
+            Procedure1<? super Boolean> plan)
+    {
+    }
+
+    @Override
+    public SocialExperiment conductSocialExperiment(EventSpace space, Scope<Address> scope, BeliefQuery query,
+            Function2<? super SocialExperiment, ? super BeliefDisclosure, ? extends Boolean> evaluator)
+    {
+        SocialExperiment experiment = new SocialExperiment((OpenEventSpace) space, evaluator);
+        experiment.conduct(scope, query);
+        return experiment;
     }
     
     /**

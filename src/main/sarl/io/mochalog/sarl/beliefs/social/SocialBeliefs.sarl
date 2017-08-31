@@ -22,8 +22,6 @@ import io.sarl.lang.core.Address
 import io.sarl.lang.core.EventSpace
 import io.sarl.lang.core.Scope
 
-import io.sarl.util.Scopes
-
 /** 
  * Capacity facilitating social interaction between
  * agents by providing means of asking declarative 
@@ -68,59 +66,69 @@ capacity SocialBeliefs
     def answer(query : BeliefQuery, disclosure : BeliefDisclosure)
     
     /**
-     * Enact a plan given all agents in a space
+     * Determine if all agents in a space
      * possess knowledge bases which entail the specified
-     * query.
+     * query. Enact a plan after fetching the result.
      * <p>
      * If not all responses have been received before the
      * timeout has elapsed, assumption is made that the
-     * query is not believed by all (plan fails).
+     * query is not believed by all.
      * @param space Space to ask question in
      * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
      * (defaults to 1000)
-     * @param plan Plan to enact if all knowledge bases
-     * entail the query
+     * @param plan Plan to enact following response gathering
      */
-    def ifBelievedByAll(^space : EventSpace, scope : Scope<Address> = null,
-        query : BeliefQuery, timeout : long = 1000, plan : () => void)
+    def isBelievedByAll(^space : EventSpace, scope : Scope<Address> = null,
+        query : BeliefQuery, timeout : long = 1000, plan : (boolean) => void)
         
     /**
-     * Enact a plan given at least one agent in a space
+     * Determine if at least one agent in a space
      * possesses a knowledge base which entails the specified
-     * query.
+     * query. Enact a plan after fetching the result.
      * <p>
      * If no positive responses have been received before the
      * timeout has elapsed, assumption is made that no agents
-     * believe the query (plan fails).
+     * believe the query.
      * @param space Space to ask question in
      * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
      * (defaults to 1000)
-     * @param plan Plan to enact if any knowledge base
-     * entails the query
+     * @param plan Plan to enact following response gathering
      */
-    def ifBelievedByAny(^space : EventSpace, scope : Scope<Address> = null,
-        query : BeliefQuery, timeout : long = 1000, plan : () => void)
+    def isBelievedByAny(^space : EventSpace, scope : Scope<Address> = null,
+        query : BeliefQuery, timeout : long = 1000, plan : (boolean) => void)
         
     /**
-     * Enact a plan given no agents in the space
-     * possess a knowledge base which entails the specified
-     * query.
+     * Determine if no agents in the space possess 
+     * a knowledge base which entails the specified query.
+     * Enact a plan after fetching the result.
      * <p>
-     * Plan is only enacted given negative responses are sent
-     * from all agents within the timeout period (otherwise
-     * plan fails).
+     * If not all responses have been received before the
+     * timeout has elapsed, assumption is made that the
+     * query may be believed by some.
      * @param space Space to ask question in
      * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
      * (defaults to 1000)
-     * @param plan Plan to enact if any knowledge base
-     * entails the query
+     * @param plan Plan to enact following response gathering
      */
-    def ifBelievedByNone(^space : EventSpace, scope : Scope<Address> = null,
-        query : BeliefQuery, timeout : long = 1000, plan : () => void) 
+    def isBelievedByNone(^space : EventSpace, scope : Scope<Address> = null,
+        query : BeliefQuery, timeout : long = 1000, plan : (boolean) => void)
+    
+    /**
+     * Conduct a belief experiment on participants of a space.
+     * Allows for aggregation and analysis of responses.
+     * @param space Space to conduct experiment in
+     * @param scope Scope of the experiment
+     * @param query Query to seed experiment with
+     * @param evaluator Experiment evaluation function
+     * @return Social experiment in progress
+     */
+    def conductSocialExperiment(^space : EventSpace, scope : Scope<Address> = null,
+        query : BeliefQuery, evaluator : (SocialExperiment, BeliefDisclosure) => boolean)
+        : SocialExperiment
 }
