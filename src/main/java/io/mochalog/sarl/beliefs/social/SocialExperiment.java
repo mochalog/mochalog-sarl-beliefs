@@ -17,6 +17,7 @@
 package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
+import io.mochalog.sarl.beliefs.util.EventSpaceUtils;
 
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.EventSpace;
@@ -25,6 +26,9 @@ import io.sarl.lang.core.Scope;
 import io.sarl.lang.util.SynchronizedSet;
 
 import io.sarl.util.Collections3;
+import io.sarl.util.Scopes;
+
+import java.security.Principal;
 
 import java.util.UUID;
 
@@ -34,7 +38,7 @@ import org.eclipse.xtext.xbase.lib.Functions.Function2;
  * Experiment performed on participants of a social group (EventSpace)
  * in order to confirm or deny a hypothesis about group beliefs.
  */
-public final class SocialExperiment extends AbstractDisclosureListener
+final class SocialExperiment extends AbstractDisclosureListener
 {    
     // Flag indicating whether experiment is in progress
     private volatile boolean inProgress;
@@ -42,36 +46,94 @@ public final class SocialExperiment extends AbstractDisclosureListener
     // Evaluation function
     // Allows evaluation of each successive disclosure response
     // which is captured during the experiment
-    private Function2<? super SocialExperiment, ? super BeliefDisclosure, ? extends Boolean> evaluator;
+    private final Function2<? super SocialExperiment, ? super BeliefDisclosure, ? extends Boolean> evaluator;
 
     // Space in which experiment is taking place
-    private EventSpace experimentSpace;
-    // Queries active during experiment progression
-    private SynchronizedSet<BeliefQuery> activeQueries;
+    private final EventSpace space;
+    // Surveys active during experiment progression
+    private final SynchronizedSet<BeliefQuery> activeSurveys;
     
     // Query responses deemed to support and oppose the experiment
     // hypothesis by the evaluator
-    private SynchronizedSet<UUID> positiveResponders;
-    private SynchronizedSet<UUID> negativeResponders;
+    private final SynchronizedSet<UUID> positiveResponders;
+    private final SynchronizedSet<UUID> negativeResponders;
     
     /**
      * Constructor.
      * @param space Space to conduct experiment in
      * @param evaluator Evaluation function
+     * @throws IllegalArgumentException Social experiment could not
+     * be successfully initialised in the given space.
      */
-    public SocialExperiment(EventSpace space, 
+    public SocialExperiment(EventSpace space,
         Function2<? super SocialExperiment, ? super BeliefDisclosure, ? extends Boolean> evaluator)
+        throws IllegalArgumentException
+    {
+        this(space, null, evaluator);
+    }
+    
+    /**
+     * Constructor.
+     * @param space Space to conduct experiment in
+     * @param principal Principal to verify access permissions against
+     * @param evaluator Evaluation function
+     * @throws IllegalArgumentException Social experiment could not
+     * be successfully initialised in the given space.
+     */
+    public SocialExperiment(EventSpace space, Principal principal,
+        Function2<? super SocialExperiment, ? super BeliefDisclosure, ? extends Boolean> evaluator)
+        throws IllegalArgumentException
     {
         super();
-        inProgress = false;
         
         this.evaluator = evaluator;
+        this.space = space;
         
-        experimentSpace = space;
-        activeQueries = Collections3.emptySynchronizedSet();
+        activeSurveys = Collections3.emptySynchronizedSet();
         
         positiveResponders = Collections3.emptySynchronizedSet();
         negativeResponders = Collections3.emptySynchronizedSet();
+        
+        if (EventSpaceUtils.registerInEventSpace(this, space, principal))
+        {
+            throw new IllegalArgumentException("Social experiment could not be " + 
+                "conducted in space (" + space.getSpaceID() + "). Access restricted.");
+        }
+        else
+        {
+            inProgress = true;
+        }
+    }
+    
+    /**
+     * Survey all experiment participants with
+     * a given query.
+     * @param query Query to ask
+     * @return True if experiment is ongoing, false otherwise.
+     */
+    public boolean survey(BeliefQuery query)
+    {
+        return survey(query, Scopes.<Address>allParticipants());
+    }
+    
+    /**
+     * Survey group of experiment participants with
+     * a given query.
+     * @param query Query to ask
+     * @param scope Scope of participant group to ask
+     * @return True if experiment is ongoing, false otherwise.
+     */
+    public boolean survey(BeliefQuery query, Scope<Address> scope)
+    {
+        if (inProgress)
+        {
+            space.emit(query, scope);
+            activeSurveys.add(query);
+            
+            return true;
+        }
+        
+        return false;    
     }
     
     @Override
@@ -79,70 +141,34 @@ public final class SocialExperiment extends AbstractDisclosureListener
     {
         // Check if the experiment is running and if the
         // disclosure pertains to an active query
-        if (inProgress && activeQueries.contains(disclosure.query))
+        if (inProgress && activeSurveys.contains(disclosure.query))
         {
             // Reason about the response and stop the experiment
             // on the signal of the evaluator
-            if (!evaluator.apply(this, disclosure))
+            if (evaluator.apply(this, disclosure))
             {
-                conclude();
+                inProgress = false;
+                EventSpaceUtils.unregisterFromEventSpace(this, space);
             }
         }
-    }
-    
-    /**
-     * Perform an experiment on a series of queries.
-     * @param queries Queries to ask
-     */
-    public void conduct(BeliefQuery... queries)
-    {
-        conduct(null, queries);
-    }
-    
-    /**
-     * Perform an experiment on a series of queries.
-     * @param scope Scope of experiment
-     * @param queries Queries to ask
-     */
-    public void conduct(Scope<Address> scope, BeliefQuery... queries)
-    {
-        inProgress = true;
-        for (BeliefQuery query : queries)
-        {
-            experimentSpace.emit(query, scope);
-            activeQueries.add(query);
-        }
-    }
-    
-    /**
-     * Stop the experiment.
-     */
-    public void conclude()
-    {
-        inProgress = false;
-        
-        activeQueries.clear();
-        
-        positiveResponders.clear();
-        negativeResponders.clear();
     }
     
     /**
      * Check if experiment is currently running.
      * @return True if experiment running, false otherwise.
      */
-    public boolean isInProgress()
+    public boolean inProgress()
     {
         return inProgress;
     }
     
     /**
-     * Get the queries currently being experimented on.
-     * @return Unmodifiable set of active queries
+     * Get the surveys currently actively being evaluated.
+     * @return Unmodifiable set of active survey queries
      */
-    public SynchronizedSet<BeliefQuery> getActiveQueries()
+    public SynchronizedSet<BeliefQuery> getActiveSurveys()
     {
-        return Collections3.unmodifiableSynchronizedSet(activeQueries);
+        return Collections3.unmodifiableSynchronizedSet(activeSurveys);
     }
     
     /**
