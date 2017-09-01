@@ -25,7 +25,7 @@
     <!-- Mochalog-SARL-Beliefs properties -->
     <properties>
         <!-- SARL framework version and configuration -->
-        <sarl.version>0.5.7</sarl.version>
+        <sarl.version>0.5.8</sarl.version>
 
         <compiler.level>1.8</compiler.level>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,7 +34,7 @@
         <janus.version>2.${sarl.version}</janus.version> 
         
         <!-- Mochalog framework version -->
-        <mochalog.version>f03a9d1</mochalog.version>
+        <mochalog.version>572a027de9</mochalog.version>
     </properties>
 
     <!-- Repository definitions -->
