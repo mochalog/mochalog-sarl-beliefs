@@ -23,11 +23,8 @@ import io.mochalog.bridge.prolog.query.Query
  * object, allowing queries to be conveniently passed
  * amongst agents.
  */
-public event BeliefQuery
+public event BeliefQuery extends AbstractBeliefQuery
 {
-    // Mochalog Query being asked
-    public val queryToAsk : Query
-    
     /**
      * Constructor.
      * @param queryToAsk Query intended to be asked
@@ -35,9 +32,7 @@ public event BeliefQuery
      */
     public new(queryToAsk : String, args : Object*)
     {
-        this(
-            Query.format(queryToAsk, args)
-        )
+        super(queryToAsk, args)
     }
     
     /**
@@ -46,6 +41,6 @@ public event BeliefQuery
      */
     public new(queryToAsk : Query)
     {
-       this.queryToAsk = queryToAsk
+        super(queryToAsk)
     }
 }
