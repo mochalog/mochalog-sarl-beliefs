@@ -77,11 +77,11 @@ capacity SocialBeliefs
      * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
-     * (defaults to 1000)
+     * (defaults to 2000)
      * @param plan Plan to enact following response gathering
      */
     def isBelievedByAll(^space : EventSpace, scope : Scope<Address> = null,
-        query : BeliefQuery, timeout : long = 1000, plan : (boolean) => void)
+        query : BeliefQuery, timeout : long = 2000, plan : (boolean) => void)
         
     /**
      * Determine if at least one agent in a space
@@ -95,11 +95,11 @@ capacity SocialBeliefs
      * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
-     * (defaults to 1000)
+     * (defaults to 2000)
      * @param plan Plan to enact following response gathering
      */
     def isBelievedByAny(^space : EventSpace, scope : Scope<Address> = null,
-        query : BeliefQuery, timeout : long = 1000, plan : (boolean) => void)
+        query : BeliefQuery, timeout : long = 2000, plan : (boolean) => void)
         
     /**
      * Determine if no agents in the space possess 
@@ -113,11 +113,11 @@ capacity SocialBeliefs
      * @param scope Scope of the question
      * @param query Query to ask
      * @param timeout Time to wait for responses in ms
-     * (defaults to 1000)
+     * (defaults to 2000)
      * @param plan Plan to enact following response gathering
      */
     def isBelievedByNone(^space : EventSpace, scope : Scope<Address> = null,
-        query : BeliefQuery, timeout : long = 1000, plan : (boolean) => void)
+        query : BeliefQuery, timeout : long = 2000, plan : (boolean) => void)
     
     /**
      * Conduct a belief experiment on participants of a space.

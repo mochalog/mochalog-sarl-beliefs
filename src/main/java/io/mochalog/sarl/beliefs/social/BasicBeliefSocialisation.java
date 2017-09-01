@@ -17,6 +17,7 @@
 package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
+import io.mochalog.sarl.beliefs.util.EventSpaceUtils;
 
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
@@ -31,6 +32,7 @@ import io.sarl.lang.util.ClearableReference;
 import io.sarl.lang.util.SynchronizedSet;
 
 import io.sarl.core.ExternalContextAccess;
+import io.sarl.core.Schedules;
 import io.sarl.util.Scopes;
 
 import java.security.Principal;
@@ -53,7 +55,9 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     
     // Buffered reference to built-in ExternalContextAccess skill
     private ClearableReference<Skill> bufferedExternalContextAccessSkill;
-
+    // Buffered reference to built-in Schedules skill
+    private ClearableReference<Skill> bufferedSchedulesSkill;
+    
     /**
      * Constructor.
      * @param principal Principal for accessing restricted
@@ -122,17 +126,58 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     public void isBelievedByAll(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
         Procedure1<? super Boolean> plan)
     {
+        allAgreeWith(space, scope, query, true, timeout, plan);
+    }
+    
+    @Override
+    public void isBelievedByAny(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
+            Procedure1<? super Boolean> plan)
+    {
+        // Conduct social experiment, evaluating based on whether
+        // query is believed by any participants
+        SocialExperiment believedByAnyExperiment = conductSocialExperiment(space, scope, query, 
+            (experiment, disclosure) ->
+            {
+                UUID sourceId = disclosure.getSource().getUUID();
+                if (disclosure.isBelieved && 
+                    EventSpaceUtils.isMemberOfEventSpace(sourceId, space))
+                {
+                    // Experiment is concluded, deploy the plan
+                    // with the experiment result
+                    plan.apply(disclosure.isBelieved);
+                    return true;
+                }
+                
+                return false;
+            }
+        );
+        
+        // Ensure the experiment is forcibly killed if it
+        // elapses the timeout
+        getSchedulesSkill().in(timeout, (a) -> believedByAnyExperiment.kill());
+    }
+
+    @Override
+    public void isBelievedByNone(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
+            Procedure1<? super Boolean> plan)
+    {
+        allAgreeWith(space, scope, query, false, timeout, plan);
+    }
+    
+    private void allAgreeWith(EventSpace space, Scope<Address> scope, BeliefQuery query, 
+        boolean isTrue, long timeout, Procedure1<? super Boolean> plan)
+    {
         SynchronizedSet<UUID> participants = space.getParticipants();
         
         // Conduct social experiment, evaluating based on whether
-        // query is believed by all participants
-        conductSocialExperiment(space, scope, query, 
+        // all participants agree that a given query is either true or false
+        SocialExperiment agreedByAllExperiment = conductSocialExperiment(space, scope, query, 
             (experiment, disclosure) ->
             {
-                if (disclosure.isBelieved)
+                if (disclosure.isBelieved == isTrue)
                 {
-                    // Belief of the query is supporting evidence
-                    // towards hypothesis that all believe
+                    // Agreement with expected result is supporting evidence
+                    // towards hypothesis that all agree
                     experiment.addPositiveResponse(disclosure);
                     
                     // Experiment should only continue given we have not
@@ -146,22 +191,14 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
                 
                 // Experiment is concluded, deploy the plan
                 // with the experiment result
-                plan.apply(disclosure.isBelieved);
+                plan.apply(disclosure.isBelieved == isTrue);
                 return true;
             }
         );
-    }
-    
-    @Override
-    public void isBelievedByAny(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
-            Procedure1<? super Boolean> plan)
-    {
-    }
-
-    @Override
-    public void isBelievedByNone(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
-            Procedure1<? super Boolean> plan)
-    {
+        
+        // Ensure the experiment is forcibly killed if it
+        // elapses the timeout
+        getSchedulesSkill().in(timeout, (a) -> agreedByAllExperiment.kill());
     }
 
     @Override
@@ -239,5 +276,20 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
         }
 
         return $castSkill(ExternalContextAccess.class, this.bufferedExternalContextAccessSkill);
+    }
+    
+    /**
+     * Fetch the attached Schedules skill.
+     * @return Schedules skill
+     */
+    protected final Schedules getSchedulesSkill()
+    {
+        if (this.bufferedSchedulesSkill == null || this.bufferedSchedulesSkill.get() == null)
+        {
+            // Cache the skill for faster access later
+            this.bufferedSchedulesSkill = $getSkill(Schedules.class);
+        }
+
+        return $castSkill(Schedules.class, this.bufferedSchedulesSkill);
     }
 }

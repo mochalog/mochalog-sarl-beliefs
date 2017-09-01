@@ -147,9 +147,22 @@ final class SocialExperiment extends AbstractDisclosureListener
             // on the signal of the evaluator
             if (evaluator.apply(this, disclosure))
             {
-                inProgress = false;
-                EventSpaceUtils.unregisterFromEventSpace(this, space);
+                kill();
             }
+        }
+    }
+    
+    /**
+     * Kill the running experiment.
+     */
+    public void kill()
+    {
+        // Ensure experiment is currently in progress
+        if (inProgress)
+        {
+            inProgress = false;
+            // Detach the experiment from the event space
+            EventSpaceUtils.unregisterFromEventSpace(this, space);
         }
     }
     

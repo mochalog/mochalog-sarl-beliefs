@@ -24,6 +24,8 @@ import io.sarl.util.RestrictedAccessEventSpace;
 
 import java.security.Principal;
 
+import java.util.UUID;
+
 /**
  * Helper methods for accessing and interacting
  * with SARL event spaces.
@@ -93,7 +95,7 @@ public class EventSpaceUtils
         }
         
         // Ensure that registration was successful
-        return isListenerInEventSpace(listener, space);
+        return isMemberOfEventSpace(listener, space);
     }
     
     /**
@@ -121,7 +123,7 @@ public class EventSpaceUtils
         }
         
         // Ensure that deregistration was successful
-        return !isListenerInEventSpace(listener, space);
+        return !isMemberOfEventSpace(listener, space);
     }
     
     /**
@@ -131,8 +133,20 @@ public class EventSpaceUtils
      * @param space Space to search in
      * @return True if listener is registered, false otherwise.
      */
-    public static boolean isListenerInEventSpace(EventListener listener, EventSpace space)
+    public static boolean isMemberOfEventSpace(EventListener listener, EventSpace space)
     {
-        return space.getAddress(listener.getID()) != null;
+        return isMemberOfEventSpace(listener.getID(), space);
+    }
+    
+    /**
+     * Assess whether a participant with the given ID exists
+     * in the specified event space.
+     * @param id Participant ID
+     * @param space Space to search in
+     * @return True if participant exists, false otherwise.
+     */
+    public static boolean isMemberOfEventSpace(UUID id, EventSpace space)
+    {
+        return space.getAddress(id) != null;
     }
 }
