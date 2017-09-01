@@ -209,6 +209,16 @@ public class BasicBeliefIntrospection extends Skill implements SelfBeliefs
         getBehaviorsSkill().registerBehavior(eventBoundBeliefQuery);
     }
 
+    /**
+     * Get the name associated with the underlying
+     * knowledge base.
+     * @return Unique name of knowledge base
+     */
+    public String getUniqueKnowledgeBaseName()
+    {
+        return knowledgeBase.toString();
+    }
+    
     // Following skill buffering implementations are sourced and modified from
     // BIC skill implementations in Janus runtime available at
     // https://github.com/sarl/sarl/blob/master/sre/
