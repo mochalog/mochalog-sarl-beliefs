@@ -1,0 +1,43 @@
+/**
+ * Copyright 2017 The Mochalog-SARL-Beliefs Authors.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+package io.mochalog.sarl.beliefs.behaviors
+
+import io.mochalog.sarl.beliefs.SelfBeliefs
+import io.mochalog.sarl.beliefs.social.SocialBeliefs
+
+import io.mochalog.sarl.beliefs.query.BeliefQuery
+import io.mochalog.sarl.beliefs.social.BeliefDisclosure
+
+/** 
+ * Behavior facilitating open beliefs in a social context.
+ * Default response to a given social query is to
+ * disclose all self-beliefs related to that query.
+ */
+behavior OpenBeliefInteractions
+{
+    uses SelfBeliefs, SocialBeliefs
+    
+    on BeliefQuery
+    {
+        val solutions = askAll(occurrence)
+        val disclosure = new BeliefDisclosure(occurrence, solutions)
+        
+        // For any query, openly answer
+        // with all solutions
+        answer(occurrence, disclosure)
+    }
+}
