@@ -121,7 +121,9 @@ public class BasicBeliefIntrospection extends Skill implements SelfBeliefs
      */
     private void initialiseKnowledgeBase(UUID id)
     {
-        String module = id.toString();
+        // Ensure the module name is a valid Prolog
+        // atom
+        String module = "agent_" + id.toString().replace('-', '_');
         knowledgeBase = new SandboxedPrologContext(module);
     }
 
