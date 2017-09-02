@@ -30,6 +30,7 @@ import io.sarl.util.Scopes;
 
 import java.security.Principal;
 
+import java.util.HashSet;
 import java.util.UUID;
 
 import org.eclipse.xtext.xbase.lib.Functions.Function2;
@@ -89,10 +90,10 @@ final class SocialExperiment extends AbstractDisclosureListener
         this.evaluator = evaluator;
         this.space = space;
         
-        activeSurveys = Collections3.emptySynchronizedSet();
+        activeSurveys = Collections3.synchronizedSet(new HashSet<BeliefQuery>(), new Object());
         
-        positiveResponders = Collections3.emptySynchronizedSet();
-        negativeResponders = Collections3.emptySynchronizedSet();
+        positiveResponders = Collections3.synchronizedSet(new HashSet<UUID>(), new Object());
+        negativeResponders = Collections3.synchronizedSet(new HashSet<UUID>(), new Object());
         
         if (!EventSpaceUtils.registerInEventSpace(this, space, principal))
         {
