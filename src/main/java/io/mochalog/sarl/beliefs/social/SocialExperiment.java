@@ -94,7 +94,7 @@ final class SocialExperiment extends AbstractDisclosureListener
         positiveResponders = Collections3.emptySynchronizedSet();
         negativeResponders = Collections3.emptySynchronizedSet();
         
-        if (EventSpaceUtils.registerInEventSpace(this, space, principal))
+        if (!EventSpaceUtils.registerInEventSpace(this, space, principal))
         {
             throw new IllegalArgumentException("Social experiment could not be " + 
                 "conducted in space (" + space.getSpaceID() + "). Access restricted.");
