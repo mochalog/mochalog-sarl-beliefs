@@ -58,7 +58,7 @@ public abstract class AbstractDisclosureListener implements DisclosureListener
         // Delegate event handling to overhear() method
         // given event type is BeliefDisclosure
         final Class<? extends Event> eventType = event.getClass();
-        if (!BeliefDisclosure.class.equals(eventType))
+        if (BeliefDisclosure.class.equals(eventType))
         {
             BeliefDisclosure disclosure = (BeliefDisclosure) event;
             overhear(disclosure);

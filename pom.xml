@@ -35,6 +35,9 @@
         
         <!-- Mochalog framework version -->
         <mochalog.version>80ab81e13c</mochalog.version>
+        
+        <!--  JUnit version -->
+        <junit.version>4.12</junit.version>
     </properties>
 
     <!-- Repository definitions -->
@@ -79,6 +82,12 @@
             <groupId>com.github.mochalog</groupId>
             <artifactId>mochalog</artifactId>
             <version>${mochalog.version}</version>
+        </dependency>
+        <!-- JUnit testing framework -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
         </dependency>
     </dependencies>
 

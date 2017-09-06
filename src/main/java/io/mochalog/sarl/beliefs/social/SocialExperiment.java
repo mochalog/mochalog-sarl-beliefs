@@ -128,6 +128,11 @@ final class SocialExperiment extends AbstractDisclosureListener
     {
         if (inProgress)
         {
+            // Set social experiment to source to act
+            // as 'bucket' for all responses
+            Address sourceAddress = space.getAddress(getID());
+            query.setSource(sourceAddress);
+            
             space.emit(query, scope);
             activeSurveys.add(query);
             
