@@ -45,6 +45,6 @@ event BeliefDisclosure
         this.query = query
         this.solutions = solutions
         
-        isBelieved = solutions != null && !solutions.isEmpty
+        isBelieved = solutions !== null && !solutions.isEmpty
     }
 }
