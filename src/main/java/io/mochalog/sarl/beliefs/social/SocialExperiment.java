@@ -39,7 +39,7 @@ import org.eclipse.xtext.xbase.lib.Functions.Function2;
  * Experiment performed on participants of a social group (EventSpace)
  * in order to confirm or deny a hypothesis about group beliefs.
  */
-final class SocialExperiment extends AbstractDisclosureListener
+public final class SocialExperiment extends AbstractDisclosureListener
 {    
     // Flag indicating whether experiment is in progress
     private volatile boolean inProgress;
