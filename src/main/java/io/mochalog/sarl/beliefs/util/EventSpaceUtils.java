@@ -16,9 +16,14 @@
 
 package io.mochalog.sarl.beliefs.util;
 
+import io.sarl.lang.core.Address;
+import io.sarl.lang.core.AgentContext;
+import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventListener;
 import io.sarl.lang.core.EventSpace;
+import io.sarl.lang.core.SpaceID;
 
+import io.sarl.core.ExternalContextAccess;
 import io.sarl.util.OpenEventSpace;
 import io.sarl.util.RestrictedAccessEventSpace;
 
@@ -148,5 +153,46 @@ public class EventSpaceUtils
     public static boolean isMemberOfEventSpace(UUID id, EventSpace space)
     {
         return space.getAddress(id) != null;
+    }
+    
+    /**
+     * Fetch the event space a received event was emitted in.
+     * <p>
+     * Access is <i>strictly required</i> to the enclosing context
+     * via the given ExternalContextAccess capacity.
+     * @param event Event received
+     * @param contextAccess Access to enclosing context
+     * @return Space event was emitted in
+     * @throws IllegalArgumentException No space information available or
+     * context in which event was emitted is not accessible through
+     * the given capacity.
+     */
+    public static EventSpace getSpaceEventEmittedIn(Event event, ExternalContextAccess contextAccess)
+        throws IllegalArgumentException
+    {
+        // Get the ID of the space the event originated
+        // from
+        Address source = event.getSource();
+        if (source == null)
+        {
+            throw new IllegalArgumentException("Specified event has no space information.");
+        }
+        
+        SpaceID spaceId = source.getSpaceId();
+
+        try 
+        {
+            // Retrieve the context the space with the
+            // given ID belongs to
+            AgentContext sourceContext = contextAccess
+                .getContext(spaceId.getContextID());
+            return sourceContext.getSpace(spaceId.getID()); 
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new IllegalArgumentException("Access to context in which " + 
+                "event was emitted is not granted through the give ExternalContextAccess " +
+                "capacity.");
+        }
     }
 }

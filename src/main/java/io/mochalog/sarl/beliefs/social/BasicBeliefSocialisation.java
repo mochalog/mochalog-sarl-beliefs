@@ -21,12 +21,10 @@ import io.mochalog.sarl.beliefs.util.EventSpaceUtils;
 
 import io.sarl.lang.core.Address;
 import io.sarl.lang.core.Agent;
-import io.sarl.lang.core.AgentContext;
 import io.sarl.lang.core.Event;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Scope;
 import io.sarl.lang.core.Skill;
-import io.sarl.lang.core.SpaceID;
 
 import io.sarl.lang.util.ClearableReference;
 import io.sarl.lang.util.SynchronizedSet;
@@ -111,15 +109,23 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     }
 
     @Override
-    public void answer(BeliefQuery query, BeliefDisclosure disclosure)
+    public boolean answer(BeliefQuery query, BeliefDisclosure disclosure)
     {
         // Fetch sender data to allow reply
         Address querySource = query.getSource();
-        EventSpace querySpace = getSpaceEventEmittedIn(query);
+        if (querySource == null)
+        {
+            // Unable to answer query with no source specified
+            return false;
+        }
+        
+        EventSpace querySpace = EventSpaceUtils.getSpaceEventEmittedIn(query, getExternalContextAccessSkill());
         
         setSourceToMe(disclosure, querySpace);
         // Tell the source agent the belief answer
         tellIn(querySpace, Scopes.addresses(querySource), disclosure);
+        
+        return true;
     }
 
     @Override
@@ -236,26 +242,6 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     {
         Address source = spaceToEmitIn.getAddress(getID());
         event.setSource(source);
-    }
-    
-    /**
-     * Fetch the space a received event was emitted in.
-     * @param event Received event
-     * @return Space event emitted in
-     */
-    protected EventSpace getSpaceEventEmittedIn(Event event)
-    {
-        // Get the ID of the space the event originated
-        // from
-        Address source = event.getSource();   
-        SpaceID spaceId = source.getSpaceId();
-        
-        // Retrieve the context the space with the
-        // given ID belongs to
-        AgentContext sourceContext = getExternalContextAccessSkill()
-            .getContext(spaceId.getContextID());
-        
-        return sourceContext.getSpace(spaceId.getID()); 
     }
     
     // Following skill buffering implementations are sourced and modified from

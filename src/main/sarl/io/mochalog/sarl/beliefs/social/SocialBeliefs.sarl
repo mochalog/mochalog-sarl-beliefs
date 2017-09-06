@@ -62,8 +62,10 @@ capacity SocialBeliefs
      * Directly answer a given query.
      * @param query Query to answer
      * @param disclosure Disclosure of beliefs
+     * @return True if query was able to be successfully
+     * answered, false otherwise.
      */
-    def answer(query : BeliefQuery, disclosure : BeliefDisclosure)
+    def answer(query : BeliefQuery, disclosure : BeliefDisclosure) : boolean
     
     /**
      * Determine if all agents in a space
