@@ -24,8 +24,6 @@ import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
 
 import io.sarl.lang.core.Event
 
-import java.nio.file.Path
-
 /**
  * Capacity allowing an agent to reason about
  * its currently held beliefs in a declarative format
@@ -35,10 +33,10 @@ capacity SelfBeliefs
     /**
      * Import the knowledge base stored at the given
      * file paths into the current knowledge base
-     * @param paths File path
+     * @param path File path
      * @return True if import succeeded, false otherwise.
      */
-    def load(path : Path) : boolean
+    def load(path : String) : boolean
     
     /**
      * Add a new belief to the knowledge base

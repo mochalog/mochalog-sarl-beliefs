@@ -128,11 +128,11 @@ public class BasicBeliefIntrospection extends Skill implements SelfBeliefs
     }
 
     @Override
-    public boolean load(Path path)
+    public boolean load(String path)
     {
         try
         {
-            return knowledgeBase.loadFile(path);
+            return knowledgeBase.importFile(path);
         }
         catch (IOException e)
         {
