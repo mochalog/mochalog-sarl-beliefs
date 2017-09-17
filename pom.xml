@@ -34,7 +34,7 @@
         <janus.version>2.${sarl.version}</janus.version> 
         
         <!-- Mochalog framework version -->
-        <mochalog.version>1ef697b294</mochalog.version>
+        <mochalog.version>bfe4303fa7</mochalog.version>
         
         <!--  JUnit version -->
         <junit.version>4.12</junit.version>

@@ -122,6 +122,25 @@ capacity SocialBeliefs
         query : BeliefQuery, timeout : long = 2000, plan : (boolean) => void)
     
     /**
+     * Determine if all agents in a space agree that
+     * a given query aligns with the hypothesis provided by
+     * isTrue.
+     * <p>
+     * If not all responses have been received before the
+     * timeout has elapsed, assumption is made that the
+     * query is not agreed upon by all.
+     * @param space Space to ask question in
+     * @param scope Scope of the question
+     * @param query Query to ask
+     * @param isTrue Whether all should agree that query is true, or not.
+     * @param timeout Time to wait for responses in ms
+     * (defaults to 2000)
+     * @param plan Plan to enact following response gathering
+     */
+    def allBelieveThat(^space : EventSpace, scope : Scope<Address> = null, query : BeliefQuery, 
+        isTrue : boolean, timeout : long = 2000, plan : (boolean) => void)
+    
+    /**
      * Conduct a belief experiment on participants of a space.
      * Allows for aggregation and analysis of responses.
      * @param space Space to conduct experiment in
@@ -130,7 +149,7 @@ capacity SocialBeliefs
      * @param evaluator Experiment evaluation function
      * @return Social experiment in progress
      */
-    def conductSocialExperiment(^space : EventSpace, scope : Scope<Address> = null,
+    def conductExperiment(^space : EventSpace, scope : Scope<Address> = null,
         query : BeliefQuery, evaluator : (SocialExperiment, BeliefDisclosure) => boolean)
         : SocialExperiment
 }

@@ -132,7 +132,7 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     public void isBelievedByAll(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
         Procedure1<? super Boolean> plan)
     {
-        allAgreeWith(space, scope, query, true, timeout, plan);
+        allBelieveThat(space, scope, query, true, timeout, plan);
     }
     
     @Override
@@ -141,7 +141,7 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     {
         // Conduct social experiment, evaluating based on whether
         // query is believed by any participants
-        SocialExperiment believedByAnyExperiment = conductSocialExperiment(space, scope, query, 
+        SocialExperiment believedByAnyExperiment = conductExperiment(space, scope, query, 
             (experiment, disclosure) ->
             {
                 UUID sourceId = disclosure.getSource().getUUID();
@@ -167,17 +167,18 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     public void isBelievedByNone(EventSpace space, Scope<Address> scope, BeliefQuery query, long timeout,
             Procedure1<? super Boolean> plan)
     {
-        allAgreeWith(space, scope, query, false, timeout, plan);
+        allBelieveThat(space, scope, query, false, timeout, plan);
     }
     
-    private void allAgreeWith(EventSpace space, Scope<Address> scope, BeliefQuery query, 
+    @Override
+    public void allBelieveThat(EventSpace space, Scope<Address> scope, BeliefQuery query, 
         boolean isTrue, long timeout, Procedure1<? super Boolean> plan)
     {
         SynchronizedSet<UUID> participants = space.getParticipants();
         
         // Conduct social experiment, evaluating based on whether
         // all participants agree that a given query is either true or false
-        SocialExperiment agreedByAllExperiment = conductSocialExperiment(space, scope, query, 
+        SocialExperiment agreedByAllExperiment = conductExperiment(space, scope, query, 
             (experiment, disclosure) ->
             {
                 if (disclosure.isBelieved == isTrue)
@@ -208,7 +209,7 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     }
 
     @Override
-    public SocialExperiment conductSocialExperiment(EventSpace space, Scope<Address> scope, BeliefQuery query,
+    public SocialExperiment conductExperiment(EventSpace space, Scope<Address> scope, BeliefQuery query,
             Function2<? super SocialExperiment, ? super BeliefDisclosure, ? extends Boolean> evaluator)
     {
         SocialExperiment experiment = new SocialExperiment(space, principal, evaluator);
