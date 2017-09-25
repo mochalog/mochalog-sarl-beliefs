@@ -17,6 +17,7 @@
 package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
+import io.mochalog.sarl.beliefs.social.analysis.AbstractDisclosureListener;
 import io.mochalog.sarl.beliefs.util.EventSpaceUtils;
 
 import io.sarl.lang.core.Address;

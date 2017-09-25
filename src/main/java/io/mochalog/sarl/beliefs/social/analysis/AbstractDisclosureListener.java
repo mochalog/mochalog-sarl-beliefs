@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package io.mochalog.sarl.beliefs.social;
+package io.mochalog.sarl.beliefs.social.analysis;
+
+import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 
 import io.sarl.lang.core.Event;
 

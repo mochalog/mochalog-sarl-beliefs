@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-package io.mochalog.sarl.beliefs.social;
-
-import io.sarl.lang.core.EventListener;
+package io.mochalog.sarl.beliefs.exceptions;
 
 /**
- * EventListener specifically designed for overhearing
- * and reacting to belief disclosures.
+ * Exception indicating execution of some process
+ * failed to start.
  */
-public interface DisclosureListener extends EventListener
+public class ExecutionFailedException extends Exception
 {
     /**
-     * Observe and react to belief disclosures made
-     * within a registered EventSpace.
-     * @param disclosure Belief disclosure
+     * Constructor.
      */
-    public void overhear(BeliefDisclosure disclosure);
+    public ExecutionFailedException()
+    {
+        super();
+    }
+    
+    /**
+     * Constructor.
+     * @param message Exception message
+     */
+    public ExecutionFailedException(String message)
+    {
+        super(message);
+    }
 }
