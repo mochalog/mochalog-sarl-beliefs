@@ -17,18 +17,24 @@
 package io.mochalog.sarl.beliefs.social.analysis;
 
 import io.mochalog.sarl.beliefs.exceptions.ExecutionFailedException;
+import io.mochalog.sarl.beliefs.query.BeliefQuery;
 import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 import io.mochalog.sarl.beliefs.util.EventSpaceUtils;
 
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.EventSpace;
+import io.sarl.lang.core.Scope;
 
 import io.sarl.lang.util.SynchronizedSet;
 
 import io.sarl.util.Collections3;
+import io.sarl.util.Scopes;
 
 import java.security.Principal;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -53,16 +59,21 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     /**
      * Abstract implementation of a social experiment
      * execution service.
-     * @param <S> Social experiment type to build
+     * @param <E> Social experiment executor type to use
      */
-    public static abstract class Executor<S extends AbstractSocialExperiment> 
-        implements SocialExperimentExecutor<S>
+    public static abstract class Executor<E extends Executor<E>> implements SocialExperimentExecutor
     {
         // Space to execute experiment in
         private EventSpace space;
         // Principal to use in order to access space
         private Principal principal;
 
+        // Belief surveys to be asked of experiment participants upon
+        // execution
+        private Set<BeliefQuery> surveys;
+        // Scope of participants to ask surveys of
+        private Scope<Address> surveyScope;
+        
         // Number of scheduling threads to queue
         private static final int NUM_EXPERIMENT_SCHEDULING_THREADS = 20;
         // Scheduler of experiment timeouts
@@ -78,6 +89,10 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
          */
         public Executor()
         {
+            surveys = new HashSet<BeliefQuery>();
+            // Default survey scope to all experiment participants
+            surveyScope = Scopes.<Address>allParticipants();
+            
             scheduler = new ScheduledThreadPoolExecutor(NUM_EXPERIMENT_SCHEDULING_THREADS);
             experimentTimeout = DEFAULT_TIMEOUT;
         }
@@ -89,10 +104,10 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
         }
         
         @Override
-        public SocialExperimentExecutor<S> setSpace(EventSpace space)
+        public E setSpace(EventSpace space)
         {
             this.space = space;
-            return this;
+            return self();
         }
         
         @Override
@@ -102,10 +117,43 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
         }
 
         @Override
-        public SocialExperimentExecutor<S> setAccessPrincipal(Principal principal)
+        public E setAccessPrincipal(Principal principal)
         {
             this.principal = principal;
-            return this;
+            return self();
+        }
+        
+        @Override
+        public Set<BeliefQuery> getSurveys()
+        {
+            return surveys;
+        }
+        
+        @Override
+        public E addSurvey(BeliefQuery survey)
+        {
+            surveys.add(survey);
+            return self();
+        }
+        
+        @Override
+        public E addSurveys(Collection<BeliefQuery> surveys)
+        {
+            surveys.addAll(surveys);
+            return self();
+        }
+
+        @Override
+        public Scope<Address> getSurveyScope()
+        {
+            return surveyScope;
+        }
+        
+        @Override
+        public E setSurveyScope(Scope<Address> scope)
+        {
+            surveyScope = scope;
+            return self();
         }
         
         @Override
@@ -115,16 +163,16 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
         }
         
         @Override
-        public SocialExperimentExecutor<S> endExperimentAfter(long timeout)
+        public E endExperimentAfter(long timeout)
         {
             this.experimentTimeout = timeout;
-            return this;
+            return self();
         }
 
         @Override
-        public S execute() throws ExecutionFailedException
+        public SocialExperiment execute() throws ExecutionFailedException
         {
-            S experiment = build();
+            AbstractSocialExperiment experiment = build();
             // Attempt to start experiment in the given event space
             if (experiment == null || !EventSpaceUtils.registerInEventSpace(experiment, space, principal))
             {
@@ -133,8 +181,13 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
             }
             
             // Signal that experiment has started
-            AbstractSocialExperiment abstractExperiment = (AbstractSocialExperiment) experiment;
-            abstractExperiment.inProgress = true;
+            experiment.inProgress = true;
+            
+            // Ask each survey query in experiment space
+            for (BeliefQuery survey : surveys)
+            {
+                experiment.surveyParticipants(survey);
+            }
             
             // Schedule an experiment timeout (after time elapsed, kill
             // the experiment and produce a negative result
@@ -151,7 +204,14 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
          * Build a new experiment to be executed by the Executor.
          * @return Social experiment instance
          */
-        protected abstract S build();
+        protected abstract AbstractSocialExperiment build();
+        
+        /**
+         * Get current executor instance for correct chaining
+         * of executor methods.
+         * @return Executor instance
+         */
+        protected abstract E self();
     }
     
     /**

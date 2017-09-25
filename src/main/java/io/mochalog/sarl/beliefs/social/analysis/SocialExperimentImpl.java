@@ -56,7 +56,7 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
      * Implementation of social experiment executor service
      * for SocialExperimentImpl instances.
      */
-    public static class Executor extends AbstractSocialExperiment.Executor<SocialExperimentImpl>
+    public static class Executor extends AbstractSocialExperiment.Executor<Executor>
     {
         // Evaluation function to apply to the given
         // experiment
@@ -64,45 +64,44 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
         // Callback function to be invoked on result computation
         private Procedure1<? super Boolean> callback;
         
-        // Belief surveys to be asked of experiment participants upon
-        // execution
-        private SynchronizedSet<BeliefQuery> surveys;
-        
-        @Override
+        /**
+         * Get evaluation function used to evaluate responses.
+         * @return Evaluation function
+         */
         public Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> getEvaluator()
         {
             return evaluator;
         }
 
-        @Override
-        public SocialExperimentExecutor<SocialExperimentImpl>
+        /**
+         * Set the evaluation function experiment will use to evaluate responses.
+         * @param evaluator Evaluation function
+         * @return Executor instance
+         */
+        public Executor 
             setEvaluator(Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> evaluator)
         {
             this.evaluator = evaluator;
             return this;
         }
         
-        @Override
-        public SynchronizedSet<BeliefQuery> getSurveys()
-        {
-            return surveys;
-        }
-        
-        @Override
-        public SocialExperimentExecutor<SocialExperimentImpl> addSurvey(BeliefQuery survey)
-        {
-            surveys.add(survey);
-            return this;
-        }
-
-        @Override
+        /**
+         * Get the callback function which will be executed
+         * on experimental result collection.
+         * @return Callback function
+         */
         public Procedure1<? super Boolean> getExperimentResultCallback()
         {
             return callback;
         }
         
-        @Override
-        public SocialExperimentExecutor<SocialExperimentImpl> onExperimentResult(Procedure1<? super Boolean> callback)
+        /**
+         * Provide callback function to be invoked when experiment finalised
+         * and result collected.
+         * @param callback Callback function
+         * @return Executor instance
+         */
+        public Executor onExperimentResult(Procedure1<? super Boolean> callback)
         {
             this.callback = callback;
             return this;
@@ -119,12 +118,6 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
             
             SocialExperimentImpl experiment = new SocialExperimentImpl(getSpace(), evaluator);
             
-            // Ask all provided surveys
-            for (BeliefQuery survey : surveys)
-            {
-                experiment.surveyParticipants(survey);
-            }
-            
             // Register a result callback function given
             // it was provided
             if (callback != null)
@@ -133,6 +126,12 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
             }
             
             return experiment;
+        }
+
+        @Override
+        protected Executor self()
+        {
+            return this;
         }
     }
     

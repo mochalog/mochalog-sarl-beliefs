@@ -18,30 +18,29 @@ package io.mochalog.sarl.beliefs.social.analysis;
 
 import io.mochalog.sarl.beliefs.exceptions.ExecutionFailedException;
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
-import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 
+import io.sarl.lang.core.Address;
 import io.sarl.lang.core.EventSpace;
-
-import io.sarl.lang.util.SynchronizedSet;
+import io.sarl.lang.core.Scope;
 
 import java.security.Principal;
 
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * Interface for executor services of social experiments in event spaces.
  * <p>
  * Acts as both an experiment builder and executor.
  */
-public interface SocialExperimentExecutor<S extends SocialExperiment>
+public interface SocialExperimentExecutor
 {   
     /**
      * Set space to conduct executed experiment in.
      * @param space Event space
      * @return Executor instance
      */
-    public SocialExperimentExecutor<S> setSpace(EventSpace space);
+    public SocialExperimentExecutor setSpace(EventSpace space);
     
     /**
      * Space in which experiment will be conducted.
@@ -54,7 +53,7 @@ public interface SocialExperimentExecutor<S extends SocialExperiment>
      * @param principal Access principal
      * @return Executor instance
      */
-    public SocialExperimentExecutor<S> setAccessPrincipal(Principal principal);
+    public SocialExperimentExecutor setAccessPrincipal(Principal principal);
     
     /**
      * Access principal with which space access will be authenticated.
@@ -63,33 +62,42 @@ public interface SocialExperimentExecutor<S extends SocialExperiment>
     public Principal getAccessPrincipal();
     
     /**
-     * Set the evaluation function experiment will use to evaluate responses.
-     * @param evaluator Evaluation function
-     * @return Executor instance
-     */
-    public SocialExperimentExecutor<S> setEvaluator(
-        Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> evaluator);
-    
-    /**
-     * Get evaluation function used to evaluate responses.
-     * @return Evaluation function
-     */
-    public Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> getEvaluator();
-
-    /**
      * Add a survey query to be posed to experiment participants
      * on execution.
      * @param survey Survey to ask
      * @return Executor instance
      */
-    public SocialExperimentExecutor<S> addSurvey(BeliefQuery survey);
+    public SocialExperimentExecutor addSurvey(BeliefQuery survey);
+    
+    /**
+     * Add a collection of survey queries to be posed to experiment participants
+     * on execution.
+     * @param surveys Surveys to ask
+     * @return Executor instance
+     */
+    public SocialExperimentExecutor addSurveys(Collection<BeliefQuery> surveys);
     
     /**
      * Get all surveys which will be asked on experiment
      * execution.
      * @return Surveys to ask
      */
-    public SynchronizedSet<BeliefQuery> getSurveys();
+    public Set<BeliefQuery> getSurveys();
+    
+    /**
+     * Set the scope of experiment participants to which
+     * surveys will be posed.
+     * @param scope Survey scope
+     * @return Executor instance
+     */
+    public SocialExperimentExecutor setSurveyScope(Scope<Address> scope);
+    
+    /**
+     * Get the scope of experiment participants to which
+     * surveys will be posed.
+     * @return Survey scope
+     */
+    public Scope<Address> getSurveyScope();
     
     /**
      * Provide a timeout after which the executed experiment
@@ -97,7 +105,7 @@ public interface SocialExperimentExecutor<S extends SocialExperiment>
      * @param timeout Time in ms
      * @return Executor instance
      */
-    public SocialExperimentExecutor<S> endExperimentAfter(long timeout);
+    public SocialExperimentExecutor endExperimentAfter(long timeout);
     
     /**
      * Get timeout value which will be used to cap
@@ -105,22 +113,7 @@ public interface SocialExperimentExecutor<S extends SocialExperiment>
      * @return Time in ms
      */
     public long getExperimentTimeout();
-    
-    /**
-     * Provide callback function to be invoked when experiment finalised
-     * and result collected.
-     * @param callback Callback function
-     * @return Executor instance
-     */
-    public SocialExperimentExecutor<S> onExperimentResult(Procedure1<? super Boolean> callback);
-    
-    /**
-     * Get the callback function which will be executed
-     * on experimental result collection.
-     * @return Callback function
-     */
-    public Procedure1<? super Boolean> getExperimentResultCallback();
-    
+  
     /**
      * Execute a generated experiment based on the
      * current executor configuration.
@@ -128,5 +121,5 @@ public interface SocialExperimentExecutor<S extends SocialExperiment>
      * @throws ExecutionFailedException Experiment was unable
      * to be executed in the given event space.
      */
-    public S execute() throws ExecutionFailedException;
+    public SocialExperiment execute() throws ExecutionFailedException;
 }

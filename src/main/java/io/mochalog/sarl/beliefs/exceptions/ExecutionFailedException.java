@@ -20,7 +20,7 @@ package io.mochalog.sarl.beliefs.exceptions;
  * Exception indicating execution of some process
  * failed to start.
  */
-public class ExecutionFailedException extends Exception
+public class ExecutionFailedException extends RuntimeException
 {
     /**
      * Constructor.
