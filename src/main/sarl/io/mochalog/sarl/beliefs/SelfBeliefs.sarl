@@ -22,8 +22,6 @@ import io.mochalog.bridge.prolog.query.QuerySolution
 import io.mochalog.bridge.prolog.query.QuerySolutionList
 import io.mochalog.bridge.prolog.query.exception.NoSuchSolutionException
 
-import io.sarl.lang.core.Event
-
 /**
  * Capacity allowing an agent to reason about
  * its currently held beliefs in a declarative format
@@ -36,10 +34,13 @@ capacity SelfBeliefs
      * @param path File path
      * @return True if import succeeded, false otherwise.
      */
-    def load(path : String) : boolean
+    def loadKnowledgeBase(path : String) : boolean
     
     /**
-     * Add a new belief to the knowledge base
+     * Add a new belief to the knowledge base.
+     * Added before all matching beliefs.
+     * <p>
+     * Equivalent to SelfBeliefs.adoptFirst.
      * @param belief Belief to add
      * @param args Arguments to format belief with
      * @return True if belief was adopted successfully,
@@ -48,23 +49,43 @@ capacity SelfBeliefs
     def adopt(belief : String, args : Object*) : boolean
     
     /**
-     * Remove the first matching belief from the knowledge base
+     * Add a new belief to the knowledge base.
+     * Added before all matching beliefs.
+     * @param belief Belief to add
+     * @param args Arguments to format belief with
+     * @return True if belief was adopted successfully,
+     * false otherwise.
+     */
+    def adoptFirst(belief : String, args : Object*) : boolean
+    
+    /**
+     * Add a new belief to the knowledge base.
+     * Added after all matching beliefs.
+     * @param belief Belief to add
+     * @param args Arguments to format belief with
+     * @return True if belief was adopted successfully,
+     * false otherwise.
+     */
+    def adoptLast(belief : String, args : Object*) : boolean
+    
+    /**
+     * Drop the first matching belief from the knowledge base
      * @param belief Belief to remove
      * @param args Arguments to format belief with
      * @return True if belief was renounced successfully,
      * false otherwise.
      */
-    def renounce(belief : String, args : Object*) : boolean
+    def drop(belief : String, args : Object*) : boolean
     
     /**
-     * Remove all matching beliefs from the knowledge base
+     * Drop all matching beliefs from the knowledge base
      * @param belief Belief definition for which all matching
      * beliefs should be removed
      * @param args Arguments to format belief with
      * @return True if belief definition was renounced
      * successfully, false otherwise.
      */
-    def renounceAll(belief : String, args : Object*) : boolean
+    def dropAll(belief : String, args : Object*) : boolean
     
     /**
      * Ask if query is satisfied by agent knowledge base
@@ -114,21 +135,4 @@ capacity SelfBeliefs
      * @return Agent belief list
      */
     def askAll(query : BeliefQuery) : QuerySolutionList
-    
-    /**
-     * Compel agent to query its beliefs in response
-     * to receiving a specified event
-     * @param query Unformatted query to ask
-     * @param args Arguments to format query with
-     * @param <T> Event type to respond to
-     */
-    def askOn(query : String, args : Object*) with T extends Event
-    
-    /**
-     * Compel agent to query its beliefs in response
-     * to receiving a specified event
-     * @param query Query to ask
-     * @param <T> Event type to respond to
-     */
-    def askOn(query : BeliefQuery) with T extends Event
 }
