@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.mochalog.sarl.beliefs.social.analysis;
+package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 
@@ -63,7 +63,7 @@ public abstract class AbstractDisclosureListener implements DisclosureListener
         if (BeliefDisclosure.class.equals(eventType))
         {
             BeliefDisclosure disclosure = (BeliefDisclosure) event;
-            overhear(disclosure);
+            onDisclosure(disclosure);
         }
     }
 }

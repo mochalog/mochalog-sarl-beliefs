@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.mochalog.sarl.beliefs.social.analysis;
+package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 
@@ -31,5 +31,5 @@ public interface DisclosureListener extends EventListener
      * within a registered EventSpace.
      * @param disclosure Belief disclosure
      */
-    public void overhear(BeliefDisclosure disclosure);
+    public void onDisclosure(BeliefDisclosure disclosure);
 }

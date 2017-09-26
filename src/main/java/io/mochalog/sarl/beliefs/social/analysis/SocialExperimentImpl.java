@@ -179,7 +179,7 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
     }
 
     @Override
-    public void overhear(BeliefDisclosure disclosure)
+    public void onDisclosure(BeliefDisclosure disclosure)
     {
         // Check if the experiment is running and if the
         // disclosure pertains to an active query

@@ -18,6 +18,7 @@ package io.mochalog.sarl.beliefs.social.analysis;
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
 import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
+import io.mochalog.sarl.beliefs.social.DisclosureListener;
 
 import io.sarl.lang.util.SynchronizedSet;
 
