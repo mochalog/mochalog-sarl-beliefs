@@ -44,13 +44,16 @@ import java.util.concurrent.TimeUnit;
  * Abstract implementation of social experiment interface.
  */
 public abstract class AbstractSocialExperiment extends AbstractDisclosureListener 
-    implements AnalyticalSocialExperiment
+    implements BallotedSocialExperiment
 {
     // Flag indicating whether experiment is in progress
     private volatile boolean inProgress;
 
     // Space in which experiment is taking place
     private final EventSpace space;
+
+    // Surveys active during experiment progression
+    private final SynchronizedSet<BeliefQuery> activeSurveys;
     
     // Query responses deemed to support and oppose the experiment
     // hypothesis by the evaluator
@@ -222,6 +225,8 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     protected AbstractSocialExperiment(EventSpace space)
     {
         this.space = space;
+
+        activeSurveys = Collections3.synchronizedSet(new HashSet<BeliefQuery>(), new Object());
         
         positiveResponders = Collections3.synchronizedSet(new HashSet<UUID>(), new Object());
         negativeResponders = Collections3.synchronizedSet(new HashSet<UUID>(), new Object());
@@ -232,21 +237,36 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     {
         return inProgress;
     }
-
+    
     @Override
-    public synchronized boolean end()
+    public synchronized boolean surveyParticipants(BeliefQuery query)
     {
-        // Ensure experiment is currently in progress
+        return surveyParticipants(query, Scopes.<Address>allParticipants());
+    }
+    
+    @Override
+    public synchronized boolean surveyParticipants(BeliefQuery query, Scope<Address> scope)
+    {
         if (inProgress())
         {
-            inProgress = false;
-            // Detach the experiment from the event space
-            EventSpaceUtils.unregisterFromEventSpace(this, space);
+            // Set social experiment to source to act
+            // as 'bucket' for all responses
+            Address sourceAddress = space.getAddress(getID());
+            query.setSource(sourceAddress);
+            
+            space.emit(query, scope);
+            activeSurveys.add(query);
             
             return true;
         }
         
-        return false;
+        return false; 
+    }
+
+    @Override
+    public SynchronizedSet<BeliefQuery> getActiveSurveys()
+    {
+        return Collections3.unmodifiableSynchronizedSet(activeSurveys);
     }
 
     @Override
@@ -307,6 +327,22 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     public SynchronizedSet<UUID> getNegativeResponders()
     {
         return Collections3.unmodifiableSynchronizedSet(negativeResponders);
+    }
+    
+    @Override
+    public synchronized boolean end()
+    {
+        // Ensure experiment is currently in progress
+        if (inProgress())
+        {
+            inProgress = false;
+            // Detach the experiment from the event space
+            EventSpaceUtils.unregisterFromEventSpace(this, space);
+            
+            return true;
+        }
+        
+        return false;
     }
     
     @Override

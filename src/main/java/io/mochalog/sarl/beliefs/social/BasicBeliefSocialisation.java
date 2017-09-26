@@ -17,7 +17,7 @@
 package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
-import io.mochalog.sarl.beliefs.social.analysis.AnalyticalSocialExperiment;
+import io.mochalog.sarl.beliefs.social.analysis.BallotedSocialExperiment;
 import io.mochalog.sarl.beliefs.social.analysis.SocialExperiment;
 import io.mochalog.sarl.beliefs.social.analysis.SocialExperimentImpl;
 import io.mochalog.sarl.beliefs.util.EventSpaceUtils;
@@ -155,7 +155,7 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
      * @param experiment Social experiment access
      * @param response Current response
      */
-    private void isBelievedByAnyEvaluator(EventSpace space, AnalyticalSocialExperiment experiment,
+    private void isBelievedByAnyEvaluator(EventSpace space, BallotedSocialExperiment experiment,
         BeliefDisclosure response)
     {
         UUID sourceId = response.getSource().getUUID();
@@ -193,7 +193,7 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
      * @param participants Experiment participants
      * @param response Current response
      */
-    private void allBelieveThatEvaluator(boolean isTrue, AnalyticalSocialExperiment experiment,
+    private void allBelieveThatEvaluator(boolean isTrue, BallotedSocialExperiment experiment,
         SynchronizedSet<UUID> participants, BeliefDisclosure response)
     {
         if (response.isBelieved == isTrue)
@@ -217,7 +217,7 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     
     @Override
     public SocialExperiment conductExperiment(EventSpace space, Scope<Address> scope, BeliefQuery query, 
-        long timeout, Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> evaluator,
+        long timeout, Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> evaluator,
         Procedure1<? super Boolean> onResult)
     {
         SocialExperimentImpl.Executor executor = new SocialExperimentImpl.Executor();

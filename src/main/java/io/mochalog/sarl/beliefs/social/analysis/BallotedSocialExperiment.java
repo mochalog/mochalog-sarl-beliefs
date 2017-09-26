@@ -16,7 +16,6 @@
 
 package io.mochalog.sarl.beliefs.social.analysis;
 
-import io.mochalog.sarl.beliefs.query.BeliefQuery;
 import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 import io.mochalog.sarl.beliefs.social.DisclosureListener;
 
@@ -25,18 +24,12 @@ import io.sarl.lang.util.SynchronizedSet;
 import java.util.UUID;
 
 /**
- * Interface for access to in-progress social experiment
- * survey responses. Facilitates analysis of the experiment
- * results as the experiment is ongoing. 
+ * Interface for access to social experiment with
+ * survey responses. Facilitates analysis of the experimental
+ * response sentiment.
  */
-public interface AnalyticalSocialExperiment extends SocialExperiment, DisclosureListener
-{
-    /**
-     * Get the surveys currently actively being evaluated.
-     * @return Set of active survey queries
-     */
-    public SynchronizedSet<BeliefQuery> getActiveSurveys();
-    
+public interface BallotedSocialExperiment extends SocialExperiment, DisclosureListener
+{    
     /**
      * Mark a given disclosure response as being supportive of the
      * survey hypothesis.

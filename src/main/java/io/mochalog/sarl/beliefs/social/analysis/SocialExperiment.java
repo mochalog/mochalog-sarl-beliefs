@@ -22,6 +22,8 @@ import io.sarl.lang.core.Address;
 import io.sarl.lang.core.EventSpace;
 import io.sarl.lang.core.Scope;
 
+import io.sarl.lang.util.SynchronizedSet;
+
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 /**
@@ -35,6 +37,12 @@ public interface SocialExperiment
      * @return True if experiment running, false otherwise.
      */
     public boolean inProgress();
+    
+    /**
+     * Get the surveys currently actively being evaluated.
+     * @return Set of active survey queries
+     */
+    public SynchronizedSet<BeliefQuery> getActiveSurveys();
     
     /**
      * Survey all experiment participants with

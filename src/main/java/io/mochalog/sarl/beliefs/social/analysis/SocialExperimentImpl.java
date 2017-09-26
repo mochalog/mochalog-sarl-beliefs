@@ -16,19 +16,9 @@
 
 package io.mochalog.sarl.beliefs.social.analysis;
 
-import io.mochalog.sarl.beliefs.query.BeliefQuery;
 import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 
-import io.sarl.lang.core.Address;
 import io.sarl.lang.core.EventSpace;
-import io.sarl.lang.core.Scope;
-
-import io.sarl.lang.util.SynchronizedSet;
-
-import io.sarl.util.Collections3;
-import io.sarl.util.Scopes;
-
-import java.util.HashSet;
 
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
@@ -42,12 +32,9 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
     // Evaluation function
     // Allows evaluation of each successive disclosure response
     // which is captured during the experiment
-    private final Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> evaluator;
+    private final Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> evaluator;
     // Callback function to invoke once result has been computed
     private Procedure1<? super Boolean> callback;
-    
-    // Surveys active during experiment progression
-    private final SynchronizedSet<BeliefQuery> activeSurveys;
 
     // Current result of experiment
     private boolean result;
@@ -60,7 +47,7 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
     {
         // Evaluation function to apply to the given
         // experiment
-        private Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> evaluator;
+        private Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> evaluator;
         // Callback function to be invoked on result computation
         private Procedure1<? super Boolean> callback;
         
@@ -68,7 +55,7 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
          * Get evaluation function used to evaluate responses.
          * @return Evaluation function
          */
-        public Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> getEvaluator()
+        public Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> getEvaluator()
         {
             return evaluator;
         }
@@ -79,7 +66,7 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
          * @return Executor instance
          */
         public Executor 
-            setEvaluator(Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure> evaluator)
+            setEvaluator(Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> evaluator)
         {
             this.evaluator = evaluator;
             return this;
@@ -141,41 +128,13 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
      * @param evaluator Evaluation function
      */
     private SocialExperimentImpl(EventSpace space, 
-        Procedure2<? super AnalyticalSocialExperiment, ? super BeliefDisclosure>evaluator)
+        Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure>evaluator)
     {
         super(space);
         this.evaluator = evaluator;
         
-        activeSurveys = Collections3.synchronizedSet(new HashSet<BeliefQuery>(), new Object());
-        
         // Result should default to negative
         result = false;
-    }
-
-    @Override
-    public synchronized boolean surveyParticipants(BeliefQuery query)
-    {
-        return surveyParticipants(query, Scopes.<Address>allParticipants());
-    }
-    
-    @Override
-    public synchronized boolean surveyParticipants(BeliefQuery query, Scope<Address> scope)
-    {
-        if (inProgress())
-        {
-            // Set social experiment to source to act
-            // as 'bucket' for all responses
-            EventSpace space = getSpace();
-            Address sourceAddress = space.getAddress(getID());
-            query.setSource(sourceAddress);
-            
-            space.emit(query, scope);
-            activeSurveys.add(query);
-            
-            return true;
-        }
-        
-        return false; 
     }
 
     @Override
@@ -183,19 +142,13 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
     {
         // Check if the experiment is running and if the
         // disclosure pertains to an active query
-        if (inProgress() && activeSurveys.contains(disclosure.query))
+        if (inProgress() && getActiveSurveys().contains(disclosure.query))
         {
             // Evaluate the current response
             evaluator.apply(this, disclosure);
         }
     }
 
-    @Override
-    public SynchronizedSet<BeliefQuery> getActiveSurveys()
-    {
-        return Collections3.unmodifiableSynchronizedSet(activeSurveys);
-    }
-    
     @Override
     public void onResult(Procedure1<? super Boolean> callback)
     {
