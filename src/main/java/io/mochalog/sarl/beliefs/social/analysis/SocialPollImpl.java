@@ -24,30 +24,31 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
 
 /**
- * Implementation of the social experiment paradigm with
- * multiple surveys and result callbacks.
+ * Implementation of interface allowing agents to conduct
+ * polls involving other members of a space.
  */
-public class SocialExperimentImpl extends AbstractSocialExperiment
+public final class SocialPollImpl extends AbstractSocialExperiment
+    implements SocialPollBallot
 {
     // Evaluation function
     // Allows evaluation of each successive disclosure response
-    // which is captured during the experiment
-    private final Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> evaluator;
+    // which is captured during the poll
+    private final Procedure2<? super SocialPollBallot, ? super BeliefDisclosure> evaluator;
     // Callback function to invoke once result has been computed
     private Procedure1<? super Boolean> callback;
 
-    // Current result of experiment
+    // Current result of poll
     private boolean result;
     
     /**
-     * Implementation of social experiment executor service
-     * for SocialExperimentImpl instances.
+     * Implementation of social poll executor service
+     * for SocialPollImpl instances.
      */
-    public static class Executor extends AbstractSocialExperiment.Executor<Executor>
+    public static class Executor extends AbstractSocialExperiment.Executor<Executor, SocialPollImpl>
     {
         // Evaluation function to apply to the given
-        // experiment
-        private Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> evaluator;
+        // poll
+        private Procedure2<? super SocialPollBallot, ? super BeliefDisclosure> evaluator;
         // Callback function to be invoked on result computation
         private Procedure1<? super Boolean> callback;
         
@@ -55,18 +56,18 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
          * Get evaluation function used to evaluate responses.
          * @return Evaluation function
          */
-        public Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> getEvaluator()
+        public Procedure2<? super SocialPollBallot, ? super BeliefDisclosure> getEvaluator()
         {
             return evaluator;
         }
 
         /**
-         * Set the evaluation function experiment will use to evaluate responses.
+         * Set the evaluation function the poll will use to evaluate responses.
          * @param evaluator Evaluation function
          * @return Executor instance
          */
         public Executor 
-            setEvaluator(Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> evaluator)
+            setEvaluator(Procedure2<? super SocialPollBallot, ? super BeliefDisclosure> evaluator)
         {
             this.evaluator = evaluator;
             return this;
@@ -74,28 +75,34 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
         
         /**
          * Get the callback function which will be executed
-         * on experimental result collection.
+         * on poll result collection.
          * @return Callback function
          */
-        public Procedure1<? super Boolean> getExperimentResultCallback()
+        public Procedure1<? super Boolean> getPollResultCallback()
         {
             return callback;
         }
         
         /**
-         * Provide callback function to be invoked when experiment finalised
+         * Provide callback function to be invoked when poll finalised
          * and result collected.
          * @param callback Callback function
          * @return Executor instance
          */
-        public Executor onExperimentResult(Procedure1<? super Boolean> callback)
+        public Executor onPollResult(Procedure1<? super Boolean> callback)
         {
             this.callback = callback;
             return this;
         }
         
         @Override
-        protected SocialExperimentImpl build()
+        protected void onExperimentTimeout(SocialPollImpl poll)
+        {
+            poll.finalisePollResult(false);
+        }
+        
+        @Override
+        protected SocialPollImpl build()
         {
             // Experiments require a space and evaluation function
             if (getSpace() == null || evaluator == null)
@@ -103,16 +110,16 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
                 return null;
             }
             
-            SocialExperimentImpl experiment = new SocialExperimentImpl(getSpace(), evaluator);
+            SocialPollImpl poll = new SocialPollImpl(getSpace(), evaluator);
             
             // Register a result callback function given
             // it was provided
             if (callback != null)
             {
-                experiment.onResult(callback);
+                poll.onPollResult(callback);
             }
             
-            return experiment;
+            return poll;
         }
 
         @Override
@@ -124,11 +131,11 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
     
     /**
      * Constructor.
-     * @param space Space to conduct experiment in
+     * @param space Space to conduct poll in
      * @param evaluator Evaluation function
      */
-    private SocialExperimentImpl(EventSpace space, 
-        Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure>evaluator)
+    private SocialPollImpl(EventSpace space, 
+        Procedure2<? super SocialPollBallot, ? super BeliefDisclosure> evaluator)
     {
         super(space);
         this.evaluator = evaluator;
@@ -140,7 +147,7 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
     @Override
     public void onDisclosure(BeliefDisclosure disclosure)
     {
-        // Check if the experiment is running and if the
+        // Check if the poll is running and if the
         // disclosure pertains to an active query
         if (inProgress() && getActiveSurveys().contains(disclosure.query))
         {
@@ -150,13 +157,13 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
     }
 
     @Override
-    public void onResult(Procedure1<? super Boolean> callback)
+    public void onPollResult(Procedure1<? super Boolean> callback)
     {
         this.callback = callback;
     }
     
     @Override
-    public synchronized void finaliseResult(boolean result)
+    public synchronized void finalisePollResult(boolean result)
     {
         if (inProgress())
         {
@@ -168,7 +175,7 @@ public class SocialExperimentImpl extends AbstractSocialExperiment
     @Override
     public synchronized boolean end()
     {
-        // On experiment end, ensure the
+        // On poll end, ensure the
         // result callback is invoked given one 
         // was registered
         if (super.end() && callback != null)

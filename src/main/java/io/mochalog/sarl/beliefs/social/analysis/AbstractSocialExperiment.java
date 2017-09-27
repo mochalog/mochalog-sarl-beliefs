@@ -33,6 +33,7 @@ import io.sarl.util.Scopes;
 
 import java.security.Principal;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,7 +45,7 @@ import java.util.concurrent.TimeUnit;
  * Abstract implementation of social experiment interface.
  */
 public abstract class AbstractSocialExperiment extends AbstractDisclosureListener 
-    implements BallotedSocialExperiment
+    implements SocialExperimentBallot
 {
     // Flag indicating whether experiment is in progress
     private volatile boolean inProgress;
@@ -63,9 +64,11 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     /**
      * Abstract implementation of a social experiment
      * execution service.
-     * @param <E> Social experiment executor type to use
+     * @param <E> Executor type to use (used for chaining)
+     * @param <S> Social experiment type to execute
      */
-    public static abstract class Executor<E extends Executor<E>> implements SocialExperimentExecutor
+    public static abstract class Executor<E extends Executor<E, S>, S extends AbstractSocialExperiment> 
+        implements SocialExperimentExecutor<E, S>
     {
         // Space to execute experiment in
         private EventSpace space;
@@ -172,11 +175,18 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
             this.experimentTimeout = timeout;
             return self();
         }
+        
+        /**
+         * Executor procedure to invoke if experiment
+         * elapses given timeout duration.
+         * @param experiment Experiment instance to use
+         */
+        protected abstract void onExperimentTimeout(S experiment);
 
         @Override
-        public SocialExperiment execute() throws ExecutionFailedException
+        public S execute() throws ExecutionFailedException
         {
-            AbstractSocialExperiment experiment = build();
+            S experiment = build();
             // Attempt to start experiment in the given event space
             if (experiment == null || !EventSpaceUtils.registerInEventSpace(experiment, space, principal))
             {
@@ -185,20 +195,16 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
             }
             
             // Signal that experiment has started
-            experiment.inProgress = true;
-            
+            ((AbstractSocialExperiment) experiment).inProgress = true;
             // Ask each survey query in experiment space
-            for (BeliefQuery survey : surveys)
-            {
-                experiment.surveyParticipants(survey);
-            }
+            experiment.surveyParticipants(surveys, surveyScope);
             
             // Schedule an experiment timeout (after time elapsed, kill
             // the experiment and produce a negative result
             if (experimentTimeout != DEFAULT_TIMEOUT)
             {
-                scheduler.schedule(() -> experiment.finaliseResult(false), 
-                    experimentTimeout, TimeUnit.MILLISECONDS);
+                scheduler.schedule(() -> onExperimentTimeout(experiment), experimentTimeout, 
+                    TimeUnit.MILLISECONDS);
             }
             
             return experiment;
@@ -208,7 +214,7 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
          * Build a new experiment to be executed by the Executor.
          * @return Social experiment instance
          */
-        protected abstract AbstractSocialExperiment build();
+        protected abstract S build();
         
         /**
          * Get current executor instance for correct chaining
@@ -247,20 +253,49 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     @Override
     public synchronized boolean surveyParticipants(BeliefQuery query, Scope<Address> scope)
     {
+        return surveyParticipants(Arrays.asList(query), scope);
+    }
+    
+    @Override
+    public synchronized boolean surveyParticipants(Collection<BeliefQuery> queries, 
+        Scope<Address> scope)
+    {
         if (inProgress())
         {
-            // Set social experiment to source to act
-            // as 'bucket' for all responses
-            Address sourceAddress = space.getAddress(getID());
-            query.setSource(sourceAddress);
+            // Remove duplicate surveys
+            queries.removeAll(activeSurveys);
             
-            space.emit(query, scope);
-            activeSurveys.add(query);
+            for (BeliefQuery query : queries)
+            {
+                // Set social experiment to survey source to 
+                // ensure responses are directed to ballot
+                Address sourceAddress = space.getAddress(getID());
+                query.setSource(sourceAddress);
+                space.emit(query, scope);
+            }
+            
+            // Mark new surveys as active
+            activeSurveys.addAll(queries);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public synchronized boolean end()
+    {
+        // Ensure experiment is currently in progress
+        if (inProgress())
+        {
+            inProgress = false;
+            // Detach the experiment from the event space
+            EventSpaceUtils.unregisterFromEventSpace(this, space);
             
             return true;
         }
         
-        return false; 
+        return false;
     }
 
     @Override
@@ -330,24 +365,14 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     }
     
     @Override
-    public synchronized boolean end()
-    {
-        // Ensure experiment is currently in progress
-        if (inProgress())
-        {
-            inProgress = false;
-            // Detach the experiment from the event space
-            EventSpaceUtils.unregisterFromEventSpace(this, space);
-            
-            return true;
-        }
-        
-        return false;
-    }
-    
-    @Override
     public EventSpace getSpace()
     {
         return space;
+    }
+    
+    @Override
+    public SynchronizedSet<UUID> getParticipants()
+    {
+        return getSpace().getParticipants();
     }
 }

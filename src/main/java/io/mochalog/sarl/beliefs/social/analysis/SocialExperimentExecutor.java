@@ -30,17 +30,17 @@ import java.util.Set;
 
 /**
  * Interface for executor services of social experiments in event spaces.
- * <p>
- * Acts as both an experiment builder and executor.
+ * @param <E> Executor type to use (used for chaining)
+ * @param <S> Social experiment type to execute
  */
-public interface SocialExperimentExecutor
+public interface SocialExperimentExecutor<E extends SocialExperimentExecutor<E, S>, S extends SocialExperiment>
 {   
     /**
      * Set space to conduct executed experiment in.
      * @param space Event space
      * @return Executor instance
      */
-    public SocialExperimentExecutor setSpace(EventSpace space);
+    public E setSpace(EventSpace space);
     
     /**
      * Space in which experiment will be conducted.
@@ -53,7 +53,7 @@ public interface SocialExperimentExecutor
      * @param principal Access principal
      * @return Executor instance
      */
-    public SocialExperimentExecutor setAccessPrincipal(Principal principal);
+    public E setAccessPrincipal(Principal principal);
     
     /**
      * Access principal with which space access will be authenticated.
@@ -67,7 +67,7 @@ public interface SocialExperimentExecutor
      * @param survey Survey to ask
      * @return Executor instance
      */
-    public SocialExperimentExecutor addSurvey(BeliefQuery survey);
+    public E addSurvey(BeliefQuery survey);
     
     /**
      * Add a collection of survey queries to be posed to experiment participants
@@ -75,7 +75,7 @@ public interface SocialExperimentExecutor
      * @param surveys Surveys to ask
      * @return Executor instance
      */
-    public SocialExperimentExecutor addSurveys(Collection<BeliefQuery> surveys);
+    public E addSurveys(Collection<BeliefQuery> surveys);
     
     /**
      * Get all surveys which will be asked on experiment
@@ -90,7 +90,7 @@ public interface SocialExperimentExecutor
      * @param scope Survey scope
      * @return Executor instance
      */
-    public SocialExperimentExecutor setSurveyScope(Scope<Address> scope);
+    public E setSurveyScope(Scope<Address> scope);
     
     /**
      * Get the scope of experiment participants to which
@@ -105,7 +105,7 @@ public interface SocialExperimentExecutor
      * @param timeout Time in ms
      * @return Executor instance
      */
-    public SocialExperimentExecutor endExperimentAfter(long timeout);
+    public E endExperimentAfter(long timeout);
     
     /**
      * Get timeout value which will be used to cap
@@ -121,5 +121,5 @@ public interface SocialExperimentExecutor
      * @throws ExecutionFailedException Experiment was unable
      * to be executed in the given event space.
      */
-    public SocialExperiment execute() throws ExecutionFailedException;
+    public S execute() throws ExecutionFailedException;
 }

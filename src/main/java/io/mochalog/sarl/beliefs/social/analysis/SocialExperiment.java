@@ -24,7 +24,8 @@ import io.sarl.lang.core.Scope;
 
 import io.sarl.lang.util.SynchronizedSet;
 
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import java.util.Collection;
+import java.util.UUID;
 
 /**
  * Interface to high-level state of a social
@@ -62,6 +63,15 @@ public interface SocialExperiment
     public boolean surveyParticipants(BeliefQuery query, Scope<Address> scope);
     
     /**
+     * Survey group of experiment participants with
+     * collection of queries.
+     * @param queries Queries to ask
+     * @param scope Scope of participant group to ask
+     * @return True if experiment is ongoing, false otherwise.
+     */
+    public boolean surveyParticipants(Collection<BeliefQuery> queries, Scope<Address> scope);
+    
+    /**
      * Close an in-progress experiment. Result will
      * be computed immediately.
      * @return True if experiment ended successfully,
@@ -70,15 +80,15 @@ public interface SocialExperiment
     public boolean end();
     
     /**
-     * Register a callback function to be invoked
-     * when experiment result is finalised.
-     * @param callback Callback function
-     */
-    public void onResult(Procedure1<? super Boolean> callback);
-    
-    /**
-     * Space experiment is conducted in.
-     * @return Experiment space
+     * Get space in which social experiment
+     * is being conducted.
+     * @return Space experiment being conducted in
      */
     public EventSpace getSpace();
+    
+    /**
+     * Get all participants of the social experiment.
+     * @return Experiment participants
+     */
+    public SynchronizedSet<UUID> getParticipants();
 }

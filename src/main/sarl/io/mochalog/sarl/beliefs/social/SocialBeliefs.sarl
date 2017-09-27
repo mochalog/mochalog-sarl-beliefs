@@ -17,8 +17,8 @@
 package io.mochalog.sarl.beliefs.social
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery
-import io.mochalog.sarl.beliefs.social.analysis.BallotedSocialExperiment
-import io.mochalog.sarl.beliefs.social.analysis.SocialExperiment
+import io.mochalog.sarl.beliefs.social.analysis.SocialPoll
+import io.mochalog.sarl.beliefs.social.analysis.SocialPollBallot
 
 import io.sarl.lang.core.Address
 import io.sarl.lang.core.EventSpace
@@ -83,11 +83,11 @@ capacity SocialBeliefs
      * @param timeout Time to wait for responses in ms
      * (defaults to 2000)
      * @param plan Plan to enact following response gathering
-     * @return Social experiment in progress
+     * @return Social poll in progress
      */
     def isBelievedByAll(^space : EventSpace, scope : Scope<Address> = null,
         query : BeliefQuery, timeout : long = 2000, plan : (boolean) => void)
-        : SocialExperiment
+        : SocialPoll
         
     /**
      * Determine if at least one agent in a space
@@ -103,11 +103,11 @@ capacity SocialBeliefs
      * @param timeout Time to wait for responses in ms
      * (defaults to 2000)
      * @param plan Plan to enact following response gathering
-     * @return Social experiment in progress
+     * @return Social poll in progress
      */
     def isBelievedByAny(^space : EventSpace, scope : Scope<Address> = null,
         query : BeliefQuery, timeout : long = 2000, plan : (boolean) => void)
-        : SocialExperiment
+        : SocialPoll
         
     /**
      * Determine if no agents in the space possess 
@@ -123,11 +123,11 @@ capacity SocialBeliefs
      * @param timeout Time to wait for responses in ms
      * (defaults to 2000)
      * @param plan Plan to enact following response gathering
-     * @return Social experiment in progress
+     * @return Social poll in progress
      */
     def isBelievedByNone(^space : EventSpace, scope : Scope<Address> = null,
         query : BeliefQuery, timeout : long = 2000, plan : (boolean) => void)
-        : SocialExperiment
+        : SocialPoll
     
     /**
      * Determine if all agents in a space agree that
@@ -144,24 +144,24 @@ capacity SocialBeliefs
      * @param timeout Time to wait for responses in ms
      * (defaults to 2000)
      * @param plan Plan to enact following response gathering
-     * @return Social experiment in progress
+     * @return Social poll in progress
      */
     def allBelieveThat(^space : EventSpace, scope : Scope<Address> = null, query : BeliefQuery, 
         isTrue : boolean, timeout : long = 2000, plan : (boolean) => void) 
-        : SocialExperiment
+        : SocialPoll
     
     /**
-     * Conduct a belief experiment on participants of a space.
+     * Conduct a belief poll on participants of a space.
      * Allows for aggregation and analysis of responses.
-     * @param space Space to conduct experiment in
-     * @param scope Scope of the experiment
-     * @param query Query to seed experiment with
-     * @param timeout Maximum experiment duration in ms
-     * @param evaluator Experiment evaluation function
+     * @param space Space to conduct poll in
+     * @param scope Scope of the poll
+     * @param query Query to seed poll with
+     * @param timeout Maximum poll duration in ms
+     * @param evaluator Poll evaluation function
      * @param onResult Plan to execute on result computation
-     * @return Social experiment in progress
+     * @return Social poll in progress
      */
-    def conductExperiment(^space : EventSpace, scope : Scope<Address> = null, queries : BeliefQuery, 
-        timeout : long = 2000, evaluator : (BallotedSocialExperiment, BeliefDisclosure) => void,
-        onResult : (boolean) => void) : SocialExperiment
+    def conductPoll(^space : EventSpace, scope : Scope<Address> = null, queries : BeliefQuery, 
+        timeout : long = 2000, evaluator : (SocialPollBallot, BeliefDisclosure) => void,
+        onResult : (boolean) => void) : SocialPoll
 }

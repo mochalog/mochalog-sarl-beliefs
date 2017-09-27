@@ -17,9 +17,10 @@
 package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
-import io.mochalog.sarl.beliefs.social.analysis.BallotedSocialExperiment;
-import io.mochalog.sarl.beliefs.social.analysis.SocialExperiment;
-import io.mochalog.sarl.beliefs.social.analysis.SocialExperimentImpl;
+import io.mochalog.sarl.beliefs.social.analysis.SocialExperimentBallot;
+import io.mochalog.sarl.beliefs.social.analysis.SocialPoll;
+import io.mochalog.sarl.beliefs.social.analysis.SocialPollBallot;
+import io.mochalog.sarl.beliefs.social.analysis.SocialPollImpl;
 import io.mochalog.sarl.beliefs.util.EventSpaceUtils;
 
 import io.sarl.lang.core.Address;
@@ -129,106 +130,105 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     }
 
     @Override
-    public SocialExperiment isBelievedByAll(EventSpace space, Scope<Address> scope, BeliefQuery query, 
+    public SocialPoll isBelievedByAll(EventSpace space, Scope<Address> scope, BeliefQuery query, 
         long timeout, Procedure1<? super Boolean> plan)
     {
         return allBelieveThat(space, scope, query, true, timeout, plan);
     }
     
     @Override
-    public SocialExperiment isBelievedByAny(EventSpace space, Scope<Address> scope, BeliefQuery query, 
+    public SocialPoll isBelievedByAny(EventSpace space, Scope<Address> scope, BeliefQuery query, 
         long timeout, Procedure1<? super Boolean> plan)
     {
-        // Conduct social experiment, evaluating based on whether
+        // Conduct poll, evaluating based on whether
         // query is believed by any participants
-        return conductExperiment(
+        return conductPoll(
             space, scope, query, timeout,
-            (e, r) -> isBelievedByAnyEvaluator(space, e, r),
-            plan
+            (e, r) -> isBelievedByAnyEvaluator(space, e, r), plan
         );
     }
     
     /**
-     * Evaluation function definition for the isBelievedByAny experiment
+     * Evaluation function definition for the isBelievedByAny poll
      * interface.
      * @param space Space in which experiment is being conducted
-     * @param experiment Social experiment access
+     * @param poll Social poll access
      * @param response Current response
      */
-    private void isBelievedByAnyEvaluator(EventSpace space, BallotedSocialExperiment experiment,
+    private void isBelievedByAnyEvaluator(EventSpace space, SocialPollBallot poll,
         BeliefDisclosure response)
     {
         UUID sourceId = response.getSource().getUUID();
         if (response.isBelieved && EventSpaceUtils.isMemberOfEventSpace(sourceId, space))
         {
-            experiment.finaliseResult(true);
+            poll.finalisePollResult(true);
         }
     }
 
     @Override
-    public SocialExperiment isBelievedByNone(EventSpace space, Scope<Address> scope, BeliefQuery query, 
+    public SocialPoll isBelievedByNone(EventSpace space, Scope<Address> scope, BeliefQuery query, 
         long timeout, Procedure1<? super Boolean> plan)
     {
         return allBelieveThat(space, scope, query, false, timeout, plan);
     }
     
     @Override
-    public SocialExperiment allBelieveThat(EventSpace space, Scope<Address> scope, BeliefQuery query, 
+    public SocialPoll allBelieveThat(EventSpace space, Scope<Address> scope, BeliefQuery query, 
         boolean isTrue, long timeout, Procedure1<? super Boolean> plan)
     {
-        // Conduct social experiment, evaluating based on whether
+        // Conduct poll, evaluating based on whether
         // all participants agree that a given query is either true or false
-        return conductExperiment(
+        return conductPoll(
             space, scope, query, timeout,
-            (e, r) -> allBelieveThatEvaluator(isTrue, e, space.getParticipants(), r), 
-            plan
+            (e, r) -> allBelieveThatEvaluator(isTrue, e, r), plan
         );
     }
     
     /**
-     * Evaluation function definition for the allBelieveThat experiment
+     * Evaluation function definition for the allBelieveThat poll
      * interface.
      * @param isTrue Whether all should agree that query is true, or not.
-     * @param experiment Social experiment access
-     * @param participants Experiment participants
+     * @param poll Social poll access
      * @param response Current response
      */
-    private void allBelieveThatEvaluator(boolean isTrue, BallotedSocialExperiment experiment,
-        SynchronizedSet<UUID> participants, BeliefDisclosure response)
+    private void allBelieveThatEvaluator(boolean isTrue, SocialPollBallot poll,
+        BeliefDisclosure response)
     {
         if (response.isBelieved == isTrue)
         {
             // Agreement with expected result is supporting evidence
             // towards hypothesis that all agree
-            experiment.addPositiveResponse(response);
+            poll.addPositiveResponse(response);
             
-            // Experiment is finished if we have received positive
+            // Poll is finished if we have received positive
             // responses from all participants
-            if (experiment.getPositiveResponders().equals(participants))
+            SynchronizedSet<UUID> participants = poll.getParticipants();
+            if (poll.getPositiveResponders().equals(participants))
             {
-                experiment.finaliseResult(true);
+                poll.finalisePollResult(true);
             }
         }
         else
         {
-            experiment.finaliseResult(false);
+            poll.finalisePollResult(false);
         }
     }
     
     @Override
-    public SocialExperiment conductExperiment(EventSpace space, Scope<Address> scope, BeliefQuery query, 
-        long timeout, Procedure2<? super BallotedSocialExperiment, ? super BeliefDisclosure> evaluator,
+    public SocialPoll conductPoll(EventSpace space, Scope<Address> scope, BeliefQuery query, 
+        long timeout, Procedure2<? super SocialPollBallot, ? super BeliefDisclosure> evaluator,
         Procedure1<? super Boolean> onResult)
     {
-        SocialExperimentImpl.Executor executor = new SocialExperimentImpl.Executor();
-        return executor.setSpace(space)
-                .setAccessPrincipal(principal)
-                .addSurvey(query)
-                .setSurveyScope(scope)
-                .endExperimentAfter(timeout)
-                .setEvaluator(evaluator)
-                .onExperimentResult(onResult)
-                .execute();
+        SocialPollImpl.Executor executor = new SocialPollImpl.Executor();
+        return executor
+            .setSpace(space)
+            .setAccessPrincipal(principal)
+            .addSurvey(query)
+            .setSurveyScope(scope)
+            .endExperimentAfter(timeout)
+            .setEvaluator(evaluator)
+            .onPollResult(onResult)
+            .execute();
     }
     
     /**

@@ -24,11 +24,11 @@ import io.sarl.lang.util.SynchronizedSet;
 import java.util.UUID;
 
 /**
- * Interface for access to social experiment with
+ * Interface for access to ballot of social experiment with
  * survey responses. Facilitates analysis of the experimental
  * response sentiment.
  */
-public interface BallotedSocialExperiment extends SocialExperiment, DisclosureListener
+public interface SocialExperimentBallot extends SocialExperiment, DisclosureListener
 {    
     /**
      * Mark a given disclosure response as being supportive of the
@@ -75,11 +75,4 @@ public interface BallotedSocialExperiment extends SocialExperiment, DisclosureLi
      * @return Set of supporting responders
      */
     public SynchronizedSet<UUID> getNegativeResponders();
-    
-    /**
-     * Compute the experiment result and subsequently
-     * close the experiment.
-     * @param result Result of the experiment
-     */
-    public void finaliseResult(boolean result);
 }
