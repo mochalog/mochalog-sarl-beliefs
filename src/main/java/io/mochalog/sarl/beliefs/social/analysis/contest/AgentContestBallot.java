@@ -18,16 +18,21 @@ package io.mochalog.sarl.beliefs.social.analysis.contest;
 
 import io.mochalog.sarl.beliefs.social.analysis.SocialExperimentBallot;
 
+import java.util.Set;
 import java.util.UUID;
 
 /**
- *
+ * Interface for access to ballot of a contest being
+ * conducted in an event space. Enables announcement
+ * of contest results to entrants.
  */
 public interface AgentContestBallot extends AgentContest, SocialExperimentBallot
 {
     /**
-     * Announce the identities of the contest winners to all entrants of the contest.
-     * @param winningEntrants Identities of all contest winners
+     * Filter eligible entrants into contest winners using the win
+     * condition. Announce the identities of said winners to all
+     * contest entrants.
+     * @param eligibleEntrants Identities of eligible entrants
      */
-    public void announceContestResult(UUID... winningEntrants);
+    public void announceContestResult(Set<UUID> eligibleEntrants);
 }

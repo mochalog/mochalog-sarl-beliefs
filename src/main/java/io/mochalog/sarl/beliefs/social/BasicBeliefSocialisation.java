@@ -18,6 +18,9 @@ package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
 import io.mochalog.sarl.beliefs.social.analysis.ExperimentEvaluator;
+import io.mochalog.sarl.beliefs.social.analysis.contest.AgentContest;
+import io.mochalog.sarl.beliefs.social.analysis.contest.AgentContestBallot;
+import io.mochalog.sarl.beliefs.social.analysis.contest.AgentContestImpl;
 import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPoll;
 import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPollBallot;
 import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPollImpl;
@@ -38,8 +41,11 @@ import io.sarl.util.Scopes;
 
 import java.security.Principal;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.xtext.xbase.lib.Functions.Function1;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 /**
@@ -217,15 +223,30 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     public SocialPoll conductPoll(EventSpace space, Scope<Address> scope, BeliefQuery query, 
         long timeout, ExperimentEvaluator<SocialPollBallot> evaluator, Procedure1<? super Boolean> onResult)
     {
-        SocialPollImpl.Executor executor = new SocialPollImpl.Executor();
-        return executor
+        return new SocialPollImpl.Executor()
             .setSpace(space)
             .setAccessPrincipal(principal)
-            .addSurvey(query)
+            .addSurveys(query)
             .setSurveyScope(scope)
-            .endExperimentAfter(timeout)
             .setEvaluator(evaluator)
             .onPollResult(onResult)
+            .endExperimentAfter(timeout)
+            .execute();
+    }
+    
+    @Override
+    public AgentContest organiseContest(EventSpace space, Scope<Address> scope, 
+        BeliefQuery eligibilityQuery, long timeout, ExperimentEvaluator<AgentContestBallot> evaluator,
+        Function1<? super Set<UUID>, ? extends List<UUID>> winnerSelector)
+    {
+        return new AgentContestImpl.Executor()
+            .setSpace(space)
+            .setAccessPrincipal(principal)
+            .addSurveys(eligibilityQuery)
+            .setSurveyScope(scope)
+            .setEvaluator(evaluator)
+            .setWinnerSelector(winnerSelector)
+            .endExperimentAfter(timeout)
             .execute();
     }
     

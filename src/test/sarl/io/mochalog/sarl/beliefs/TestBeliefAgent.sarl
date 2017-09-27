@@ -14,27 +14,24 @@
  * limitations under the License.
  */
  
-package io.mochalog.sarl.beliefs.social
+package io.mochalog.sarl.beliefs
 
-import io.mochalog.sarl.beliefs.BasicBeliefIntrospection
-import io.mochalog.sarl.beliefs.SelfBeliefs
 import io.mochalog.sarl.beliefs.behaviors.OpenBeliefInteractions
-import io.mochalog.sarl.beliefs.query.BeliefQuery
+import io.mochalog.sarl.beliefs.social.BasicBeliefSocialisation
+import io.mochalog.sarl.beliefs.social.SocialBeliefs
 
 import io.sarl.core.Behaviors
-import io.sarl.core.DefaultContextInteractions
 import io.sarl.core.Initialize
 import io.sarl.core.Logging
 
 /** 
- * Agent allowing for convenient testing of social experiments.
+ * Agent with individual beliefs.
  * <p>
  * Currently limited, tests should be conducted using JUnit.
  */
-agent TestSocialExperimentAgent 
+agent TestBeliefAgent 
 {
-    uses Logging, Behaviors, DefaultContextInteractions, 
-        SelfBeliefs, SocialBeliefs
+    uses Logging, Behaviors, SelfBeliefs
     
     on Initialize
     {
@@ -45,11 +42,6 @@ agent TestSocialExperimentAgent
         
         // Adopt a Prolog belief
         adopt("test_belief")        
-        info("Is believed by agent: " + believes("test_belief"))
-        
-        // Check whether anybody in the space believes test_belief
-        defaultSpace.isBelievedByAny(new BeliefQuery("test_belief")) [ result |
-            info("At least one agent in space believes query: " + result)
-        ]
+        info("Is believed by agent with ID " + ID + ": " + believes("test_belief"))
     }
 }

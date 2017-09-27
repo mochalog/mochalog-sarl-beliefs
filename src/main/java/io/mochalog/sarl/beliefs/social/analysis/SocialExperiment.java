@@ -47,20 +47,20 @@ public interface SocialExperiment
     
     /**
      * Survey all experiment participants with
-     * a given query.
-     * @param query Query to ask
+     * a given list of queries.
+     * @param queries Queries to ask
      * @return True if experiment is ongoing, false otherwise.
      */
-    public boolean surveyParticipants(BeliefQuery query);
+    public boolean surveyParticipants(BeliefQuery... queries);
     
     /**
      * Survey group of experiment participants with
-     * a given query.
-     * @param query Query to ask
+     * a given list of query arguments.
+     * @param queries Queries to ask
      * @param scope Scope of participant group to ask
      * @return True if experiment is ongoing, false otherwise.
      */
-    public boolean surveyParticipants(BeliefQuery query, Scope<Address> scope);
+    public boolean surveyParticipants(Scope<Address> scope, BeliefQuery... queries);
     
     /**
      * Survey group of experiment participants with
@@ -74,10 +74,8 @@ public interface SocialExperiment
     /**
      * Close an in-progress experiment. Result will
      * be computed immediately.
-     * @return True if experiment ended successfully,
-     * false if experiment already completed.
      */
-    public boolean end();
+    public void end();
     
     /**
      * Get space in which social experiment

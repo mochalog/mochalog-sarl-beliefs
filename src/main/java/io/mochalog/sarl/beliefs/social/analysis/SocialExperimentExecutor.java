@@ -62,12 +62,12 @@ public interface SocialExperimentExecutor<E extends SocialExperimentExecutor<E, 
     public Principal getAccessPrincipal();
     
     /**
-     * Add a survey query to be posed to experiment participants
+     * Add a list survey query arguments to be posed to experiment participants
      * on execution.
-     * @param survey Survey to ask
+     * @param surveys Surveys to ask
      * @return Executor instance
      */
-    public E addSurvey(BeliefQuery survey);
+    public E addSurveys(BeliefQuery... surveys);
     
     /**
      * Add a collection of survey queries to be posed to experiment participants

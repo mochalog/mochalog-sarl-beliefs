@@ -18,42 +18,148 @@ package io.mochalog.sarl.beliefs.social.analysis.contest;
 
 import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 import io.mochalog.sarl.beliefs.social.analysis.AbstractSocialExperiment;
+import io.mochalog.sarl.beliefs.social.analysis.ExperimentEvaluator;
 
 import io.sarl.lang.core.EventSpace;
 
+import io.sarl.util.Collections3;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import org.eclipse.xtext.xbase.lib.Functions.Function1;
+
 /**
- *
+ * Implementation of agent contest paradigm.
  */
-public class AgentContestImpl extends AbstractSocialExperiment
+public final class AgentContestImpl extends AbstractSocialExperiment
     implements AgentContestBallot
 {
+    // Evaluation function used to aggregate entrants into either
+    // eligible or ineligible categories
+    private final ExperimentEvaluator<? super AgentContestImpl> evaluator;
+    // Function used to determine contest winners, if any, from
+    // set of eligible entrants
+    private final Function1<? super Set<UUID>, ? extends List<UUID>> winnerSelector;
+    
+    /**
+     * Implementation of executor service for AgentContestImpl instances.
+     */
+    public static class Executor extends AbstractSocialExperiment.Executor<Executor, AgentContestImpl>
+    {
+        // Function used by contest platform to determine contest winners
+        // from eligible entrants
+        private Function1<? super Set<UUID>, ? extends List<UUID>> winnerSelector;
+        
+        /**
+         * Constructor.
+         */
+        public Executor()
+        {
+            super();
+            
+            // Default evaluation function simply partitions responses
+            // in terms of sentiment
+            // Contains no early contest termination (runs through
+            // to timeout)
+            final ExperimentEvaluator<AgentContestBallot> defaultEvaluator = (contest, response) ->
+            {
+                if (response.isBelieved)
+                {
+                    contest.addPositiveResponse(response);
+                }
+                else
+                {
+                    contest.addNegativeResponse(response);
+                }
+            };
+            setEvaluator(defaultEvaluator);
+        }
+        
+        /**
+         * Set selection function used to filter winners
+         * from eligible entrants.
+         * @param winnerSelector Selection function
+         * @return Executor instance
+         */
+        public Executor 
+            setWinnerSelector(Function1<? super Set<UUID>, ? extends List<UUID>> winnerSelector)
+        {
+            this.winnerSelector = winnerSelector;
+            return this;
+        }
+        
+        @Override
+        protected void onTimeout(AgentContestImpl contest)
+        {
+            // Given contest has not been closed and announced
+            // prior to timeout, assume positive responders are
+            // eligible entrants and delegate to winner selector
+            // function for announcement
+            contest.announceContestResult(contest.getPositiveResponders());
+        }
+
+        @Override
+        protected AgentContestImpl build(EventSpace space, 
+            ExperimentEvaluator<? super AgentContestImpl> evaluator)
+        {
+            // Winner selection function must be supplied
+            if (winnerSelector == null)
+            {
+                return null;
+            }
+            
+            return new AgentContestImpl(space, evaluator, winnerSelector);
+        }
+
+        @Override
+        protected Executor self()
+        {
+            return this;
+        }
+    }
 
     /**
-     * @param space
+     * Constructor.
+     * @param space Space to organise contest in
+     * @param evaluator Evaluation function
+     * @param winnerSelector Function which will be used to filter
+     * winners from eligible entrants
      */
-    protected AgentContestImpl(EventSpace space)
+    private AgentContestImpl(EventSpace space, ExperimentEvaluator<? super AgentContestImpl> evaluator,
+        Function1<? super Set<UUID>, ? extends List<UUID>> winnerSelector)
     {
         super(space);
-        // TODO Auto-generated constructor stub
-    }
-    
-    @Override
-    public void onDisclosure(BeliefDisclosure disclosure)
-    {
-        // TODO Auto-generated method stub
         
+        this.evaluator = evaluator;
+        this.winnerSelector = winnerSelector;
     }
 
-    /* (non-Javadoc)
-     * @see io.mochalog.sarl.beliefs.social.analysis.contest.AgentContestBallot#announceContestResult(java.util.UUID[])
-     */
     @Override
-    public void announceContestResult(UUID... winningEntrants)
+    public void evaluateResponse(BeliefDisclosure response)
     {
-        // TODO Auto-generated method stub
-        
+        evaluator.evaluate(this, response);
     }
 
+    @Override
+    public void announceContestResult(Set<UUID> eligibleEntrants)
+    {
+        if (inProgress())
+        {
+            end();
+            
+            // Determine contest winners from eligible
+            // contest entrants
+            // TODO: Expensive performance-wise
+            Set<UUID> unsynchronizedWinners = new HashSet<UUID>(winnerSelector.apply(eligibleEntrants));
+            Set<UUID> winners = Collections3.synchronizedSet(unsynchronizedWinners, new Object());
+            
+            // Announce the results of the contest to all
+            // participants
+            EventSpace space = getSpace();
+            space.emit(new ContestAnnouncement(this, winners));
+        }
+    }
 }

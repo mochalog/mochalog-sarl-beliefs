@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-package io.mochalog.sarl.beliefs.social.analysis.contest;
+package io.mochalog.sarl.beliefs.social.analysis.contest
 
-import io.mochalog.sarl.beliefs.social.analysis.SocialExperiment;
+import java.util.Set
+import java.util.UUID
 
-/**
- * Interface for contests in which agents compete
- * for an arbitrary result.
+/** 
+ * Event announcing the result of a completed agent contest.
  */
-public interface AgentContest extends SocialExperiment
+event ContestAnnouncement
 {
+    // Completed contest
+    public val contest : AgentContest
+    // Identities of entrants who were selected
+    // as contest winners
+    public val winners : Set<UUID>
+    
+    /**
+     * Constructor.
+     * @param contest Completed contest
+     * @param winners Winning agents
+     */
+    public new(contest : AgentContest, winners : Set<UUID>)
+    {
+        this.contest = contest
+        this.winners = winners
+    }
 }

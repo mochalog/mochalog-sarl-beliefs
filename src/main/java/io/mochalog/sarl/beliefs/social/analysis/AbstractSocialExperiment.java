@@ -139,16 +139,15 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
         }
         
         @Override
-        public E addSurvey(BeliefQuery survey)
+        public E addSurveys(BeliefQuery... surveys)
         {
-            surveys.add(survey);
-            return self();
+            return addSurveys(Arrays.asList(surveys));
         }
         
         @Override
         public E addSurveys(Collection<BeliefQuery> surveys)
         {
-            surveys.addAll(surveys);
+            this.surveys.addAll(surveys);
             return self();
         }
 
@@ -174,7 +173,11 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
         @Override
         public E setEvaluator(ExperimentEvaluator<? super S> evaluator)
         {
-            this.evaluator = evaluator;
+            if (evaluator != null)
+            {
+                this.evaluator = evaluator;
+            }
+            
             return self();
         }
         
@@ -196,7 +199,7 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
          * elapses given timeout duration.
          * @param experiment Experiment instance to use
          */
-        protected abstract void onExperimentTimeout(S experiment);
+        protected abstract void onTimeout(S experiment);
 
         @Override
         public S execute() throws ExecutionFailedException
@@ -218,7 +221,7 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
                     // the experiment and produce a negative result
                     if (experimentTimeout != DEFAULT_TIMEOUT)
                     {
-                        scheduler.schedule(() -> onExperimentTimeout(experiment), experimentTimeout, 
+                        scheduler.schedule(() -> onTimeout(experiment), experimentTimeout, 
                             TimeUnit.MILLISECONDS);
                     }
                     
@@ -267,15 +270,15 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     }
     
     @Override
-    public synchronized boolean surveyParticipants(BeliefQuery query)
+    public synchronized boolean surveyParticipants(BeliefQuery... queries)
     {
-        return surveyParticipants(query, Scopes.<Address>allParticipants());
+        return surveyParticipants(Scopes.<Address>allParticipants(), queries);
     }
     
     @Override
-    public synchronized boolean surveyParticipants(BeliefQuery query, Scope<Address> scope)
+    public synchronized boolean surveyParticipants(Scope<Address> scope, BeliefQuery... queries)
     {
-        return surveyParticipants(Arrays.asList(query), scope);
+        return surveyParticipants(Arrays.asList(queries), scope);
     }
     
     @Override
@@ -305,7 +308,25 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
     }
     
     @Override
-    public synchronized boolean end()
+    public void onDisclosure(BeliefDisclosure disclosure)
+    {
+        // Check if the poll is running and if the
+        // disclosure pertains to an active query
+        if (inProgress() && activeSurveys.contains(disclosure.query))
+        {
+            // Evaluate the current response
+            evaluateResponse(disclosure);
+        }
+    }
+    
+    /**
+     * Evaluate the participant response that has been submitted.
+     * @param response Belief response from experiment participant 
+     */
+    public abstract void evaluateResponse(BeliefDisclosure response);
+    
+    @Override
+    public synchronized void end()
     {
         // Ensure experiment is currently in progress
         if (inProgress())
@@ -313,11 +334,7 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
             inProgress = false;
             // Detach the experiment from the event space
             EventSpaceUtils.unregisterFromEventSpace(this, space);
-            
-            return true;
         }
-        
-        return false;
     }
 
     @Override

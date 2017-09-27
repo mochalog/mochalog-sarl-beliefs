@@ -17,13 +17,20 @@
 package io.mochalog.sarl.beliefs.social
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery
+
 import io.mochalog.sarl.beliefs.social.analysis.ExperimentEvaluator
+import io.mochalog.sarl.beliefs.social.analysis.contest.AgentContest
+import io.mochalog.sarl.beliefs.social.analysis.contest.AgentContestBallot
 import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPoll
 import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPollBallot
 
 import io.sarl.lang.core.Address
 import io.sarl.lang.core.EventSpace
 import io.sarl.lang.core.Scope
+
+import java.util.List
+import java.util.Set
+import java.util.UUID
 
 /** 
  * Capacity facilitating social interaction between
@@ -162,7 +169,28 @@ capacity SocialBeliefs
      * @param onResult Plan to execute on result computation
      * @return Social poll in progress
      */
-    def conductPoll(^space : EventSpace, scope : Scope<Address> = null, queries : BeliefQuery, 
+    def conductPoll(^space : EventSpace, scope : Scope<Address> = null, query : BeliefQuery, 
         timeout : long = 2000, evaluator : ExperimentEvaluator<SocialPollBallot>,
         onResult : (boolean) => void) : SocialPoll
+
+    /**
+     * Organise a contest in a given space. Agents
+     * may enter and answer a given query to assess
+     * their preliminary eligibility for the contest.
+     * Eligible entrants will then be selected from as
+     * contest winners (multiple winners possible).
+     * @param space Space to organise contest in
+     * @param scope Scope of the contest
+     * @param eligibilityQuery Query to assess entrant eligibility
+     * @param timeout Maximum contest duration in ms
+     * @param evaluator Contest evaluation function (defaults to
+     * assumption that positive responses are eligible)
+     * @param winnerSelector Function for filtering winners from
+     * eligible entrants
+     * @return Contest in progress
+     */
+    def organiseContest(^space : EventSpace, scope : Scope<Address> = null, 
+        eligibilityQuery : BeliefQuery, timeout : long = 2000, 
+        evaluator : ExperimentEvaluator<AgentContestBallot> = null, 
+        winnerSelector : (Set<UUID>) => List<UUID>) : AgentContest
 }

@@ -23,7 +23,6 @@ import io.mochalog.sarl.beliefs.social.analysis.ExperimentEvaluator;
 import io.sarl.lang.core.EventSpace;
 
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
 
 /**
  * Implementation of interface allowing agents to conduct
@@ -32,19 +31,14 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
 public final class SocialPollImpl extends AbstractSocialExperiment
     implements SocialPollBallot
 {
-    // Evaluation function
     // Allows evaluation of each successive disclosure response
     // which is captured during the poll
     private final ExperimentEvaluator<? super SocialPollImpl> evaluator;
     // Callback function to invoke once result has been computed
     private Procedure1<? super Boolean> callback;
 
-    // Current result of poll
-    private boolean result;
-    
     /**
-     * Implementation of social poll executor service
-     * for SocialPollImpl instances.
+     * Implementation of executor service for SocialPollImpl instances.
      */
     public static class Executor extends AbstractSocialExperiment.Executor<Executor, SocialPollImpl>
     {
@@ -74,7 +68,7 @@ public final class SocialPollImpl extends AbstractSocialExperiment
         }
         
         @Override
-        protected void onExperimentTimeout(SocialPollImpl poll)
+        protected void onTimeout(SocialPollImpl poll)
         {
             poll.finalisePollResult(false);
         }
@@ -110,23 +104,14 @@ public final class SocialPollImpl extends AbstractSocialExperiment
     {
         super(space);
         this.evaluator = evaluator;
-        
-        // Result should default to negative
-        result = false;
     }
-
+    
     @Override
-    public void onDisclosure(BeliefDisclosure disclosure)
+    public void evaluateResponse(BeliefDisclosure response)
     {
-        // Check if the poll is running and if the
-        // disclosure pertains to an active query
-        if (inProgress() && getActiveSurveys().contains(disclosure.query))
-        {
-            // Evaluate the current response
-            evaluator.evaluate(this, disclosure);
-        }
+        evaluator.evaluate(this, response);
     }
-
+    
     @Override
     public void onPollResult(Procedure1<? super Boolean> callback)
     {
@@ -138,23 +123,11 @@ public final class SocialPollImpl extends AbstractSocialExperiment
     {
         if (inProgress())
         {
-            this.result = result;
             end();
+            if (callback != null)
+            {
+                callback.apply(result);
+            }
         }
-    }
-    
-    @Override
-    public synchronized boolean end()
-    {
-        // On poll end, ensure the
-        // result callback is invoked given one 
-        // was registered
-        if (super.end() && callback != null)
-        {
-            callback.apply(result);
-            return true;
-        }
-        
-        return false;
     }
 }

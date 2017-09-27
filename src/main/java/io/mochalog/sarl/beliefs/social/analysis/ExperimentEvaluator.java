@@ -19,7 +19,7 @@ package io.mochalog.sarl.beliefs.social.analysis;
 import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
 
 /**
- *
+ * Generic evaluation function for social experiment instances.
  */
 @FunctionalInterface
 public interface ExperimentEvaluator<S extends SocialExperiment>
