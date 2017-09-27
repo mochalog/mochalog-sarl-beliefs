@@ -100,6 +100,19 @@ public interface SocialExperimentExecutor<E extends SocialExperimentExecutor<E, 
     public Scope<Address> getSurveyScope();
     
     /**
+     * Get evaluation function used to evaluate responses.
+     * @return Evaluation function
+     */
+    public ExperimentEvaluator<? super S> getEvaluator();
+
+    /**
+     * Set the evaluation function the experiment will use to evaluate responses.
+     * @param evaluator Evaluation function
+     * @return Executor instance
+     */
+    public E setEvaluator(ExperimentEvaluator<? super S> evaluator);
+    
+    /**
      * Provide a timeout after which the executed experiment
      * will be finalised.
      * @param timeout Time in ms

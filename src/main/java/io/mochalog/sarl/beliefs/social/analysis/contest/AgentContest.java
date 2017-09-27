@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package io.mochalog.sarl.beliefs.social.analysis;
+package io.mochalog.sarl.beliefs.social.analysis.contest;
 
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
+import io.mochalog.sarl.beliefs.social.analysis.SocialExperiment;
 
 /**
- * Interface for social experiment type in which result
- * is expected to be a decision statement (true/false
- * statement).
+ *
  */
-public interface SocialPoll extends SocialExperiment
+public interface AgentContest extends SocialExperiment
 {
-    /**
-     * Register a callback function to be invoked
-     * when poll result is finalised.
-     * @param callback Callback function
-     */
-    public void onPollResult(Procedure1<? super Boolean> callback);
 }

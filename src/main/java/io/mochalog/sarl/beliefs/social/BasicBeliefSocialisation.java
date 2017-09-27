@@ -17,10 +17,10 @@
 package io.mochalog.sarl.beliefs.social;
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery;
-import io.mochalog.sarl.beliefs.social.analysis.SocialExperimentBallot;
-import io.mochalog.sarl.beliefs.social.analysis.SocialPoll;
-import io.mochalog.sarl.beliefs.social.analysis.SocialPollBallot;
-import io.mochalog.sarl.beliefs.social.analysis.SocialPollImpl;
+import io.mochalog.sarl.beliefs.social.analysis.ExperimentEvaluator;
+import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPoll;
+import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPollBallot;
+import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPollImpl;
 import io.mochalog.sarl.beliefs.util.EventSpaceUtils;
 
 import io.sarl.lang.core.Address;
@@ -41,7 +41,6 @@ import java.security.Principal;
 import java.util.UUID;
 
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
-import org.eclipse.xtext.xbase.lib.Procedures.Procedure2;
 
 /**
  * Skill allowing for basic belief-reasoning interactions with 
@@ -216,8 +215,7 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     
     @Override
     public SocialPoll conductPoll(EventSpace space, Scope<Address> scope, BeliefQuery query, 
-        long timeout, Procedure2<? super SocialPollBallot, ? super BeliefDisclosure> evaluator,
-        Procedure1<? super Boolean> onResult)
+        long timeout, ExperimentEvaluator<SocialPollBallot> evaluator, Procedure1<? super Boolean> onResult)
     {
         SocialPollImpl.Executor executor = new SocialPollImpl.Executor();
         return executor

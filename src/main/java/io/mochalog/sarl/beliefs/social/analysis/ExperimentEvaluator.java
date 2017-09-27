@@ -16,17 +16,13 @@
 
 package io.mochalog.sarl.beliefs.social.analysis;
 
+import io.mochalog.sarl.beliefs.social.BeliefDisclosure;
+
 /**
- * Interface for access to ballot of a poll being
- * conducted in an event space. Allows for computation
- * of decision result.
+ *
  */
-public interface SocialPollBallot extends SocialPoll, SocialExperimentBallot
+@FunctionalInterface
+public interface ExperimentEvaluator<S extends SocialExperiment>
 {
-    /**
-     * Compute the result of the poll and subsequently
-     * stop accepting submissions.
-     * @param result Result of the experiment
-     */
-    public void finalisePollResult(boolean result);
+    public void evaluate(S experiment, BeliefDisclosure response);
 }

@@ -17,8 +17,9 @@
 package io.mochalog.sarl.beliefs.social
 
 import io.mochalog.sarl.beliefs.query.BeliefQuery
-import io.mochalog.sarl.beliefs.social.analysis.SocialPoll
-import io.mochalog.sarl.beliefs.social.analysis.SocialPollBallot
+import io.mochalog.sarl.beliefs.social.analysis.ExperimentEvaluator
+import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPoll
+import io.mochalog.sarl.beliefs.social.analysis.poll.SocialPollBallot
 
 import io.sarl.lang.core.Address
 import io.sarl.lang.core.EventSpace
@@ -162,6 +163,6 @@ capacity SocialBeliefs
      * @return Social poll in progress
      */
     def conductPoll(^space : EventSpace, scope : Scope<Address> = null, queries : BeliefQuery, 
-        timeout : long = 2000, evaluator : (SocialPollBallot, BeliefDisclosure) => void,
+        timeout : long = 2000, evaluator : ExperimentEvaluator<SocialPollBallot>,
         onResult : (boolean) => void) : SocialPoll
 }

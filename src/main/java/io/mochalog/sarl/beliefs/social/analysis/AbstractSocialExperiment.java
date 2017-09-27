@@ -80,6 +80,8 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
         private Set<BeliefQuery> surveys;
         // Scope of participants to ask surveys of
         private Scope<Address> surveyScope;
+        // Evaluation function to apply to the experiment
+        private ExperimentEvaluator<? super S> evaluator;
         
         // Number of scheduling threads to queue
         private static final int NUM_EXPERIMENT_SCHEDULING_THREADS = 20;
@@ -164,6 +166,19 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
         }
         
         @Override
+        public ExperimentEvaluator<? super S> getEvaluator()
+        {
+            return evaluator;
+        }
+        
+        @Override
+        public E setEvaluator(ExperimentEvaluator<? super S> evaluator)
+        {
+            this.evaluator = evaluator;
+            return self();
+        }
+        
+        @Override
         public long getExperimentTimeout()
         {
             return experimentTimeout;
@@ -186,35 +201,42 @@ public abstract class AbstractSocialExperiment extends AbstractDisclosureListene
         @Override
         public S execute() throws ExecutionFailedException
         {
-            S experiment = build();
-            // Attempt to start experiment in the given event space
-            if (experiment == null || !EventSpaceUtils.registerInEventSpace(experiment, space, principal))
+            // Valid experiments require an evaluation function
+            // and a space to be performed in
+            if (space != null && evaluator != null)
             {
-                throw new ExecutionFailedException("Social experiment could not be " + 
-                    "conducted in space (" + space.getSpaceID() + "). Access restricted.");
+                S experiment = build(space, evaluator);
+                // Attempt to start experiment in the given event space
+                if (experiment != null && EventSpaceUtils.registerInEventSpace(experiment, space, principal))
+                {
+                    // Signal that experiment has started
+                    ((AbstractSocialExperiment) experiment).inProgress = true;
+                    // Ask each survey query in experiment space
+                    experiment.surveyParticipants(surveys, surveyScope);
+                    
+                    // Schedule an experiment timeout (after time elapsed, kill
+                    // the experiment and produce a negative result
+                    if (experimentTimeout != DEFAULT_TIMEOUT)
+                    {
+                        scheduler.schedule(() -> onExperimentTimeout(experiment), experimentTimeout, 
+                            TimeUnit.MILLISECONDS);
+                    }
+                    
+                    return experiment;
+                }
             }
             
-            // Signal that experiment has started
-            ((AbstractSocialExperiment) experiment).inProgress = true;
-            // Ask each survey query in experiment space
-            experiment.surveyParticipants(surveys, surveyScope);
-            
-            // Schedule an experiment timeout (after time elapsed, kill
-            // the experiment and produce a negative result
-            if (experimentTimeout != DEFAULT_TIMEOUT)
-            {
-                scheduler.schedule(() -> onExperimentTimeout(experiment), experimentTimeout, 
-                    TimeUnit.MILLISECONDS);
-            }
-            
-            return experiment;
+            throw new ExecutionFailedException("Social experiment could not be " + 
+                "conducted in space (" + space.getSpaceID() + "). Access restricted.");
         }
         
         /**
          * Build a new experiment to be executed by the Executor.
+         * @param space Space to conduct experiment in
+         * @param evaluator Evaluation function to use
          * @return Social experiment instance
          */
-        protected abstract S build();
+        protected abstract S build(EventSpace space, ExperimentEvaluator<? super S> evaluator);
         
         /**
          * Get current executor instance for correct chaining
