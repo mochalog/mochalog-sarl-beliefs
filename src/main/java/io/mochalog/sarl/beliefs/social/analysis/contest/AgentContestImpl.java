@@ -194,9 +194,7 @@ public final class AgentContestImpl extends AbstractSocialExperiment
             
             // Determine contest winners from eligible
             // contest entrants
-            // TODO: Expensive performance-wise
-            Set<UUID> unsynchronizedWinners = new HashSet<UUID>(winnerSelector.apply(eligibleEntrants));
-            Set<UUID> winners = Collections3.synchronizedSet(unsynchronizedWinners, new Object());
+            List<UUID> winners = winnerSelector.apply(eligibleEntrants);
             
             // Announce the results of the contest to all
             // participants

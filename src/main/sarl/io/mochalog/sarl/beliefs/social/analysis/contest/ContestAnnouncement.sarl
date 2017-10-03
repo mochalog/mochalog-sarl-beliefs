@@ -16,7 +16,7 @@
 
 package io.mochalog.sarl.beliefs.social.analysis.contest
 
-import java.util.Set
+import java.util.List
 import java.util.UUID
 
 /** 
@@ -28,14 +28,14 @@ event ContestAnnouncement
     public val contest : AgentContest
     // Identities of entrants who were selected
     // as contest winners
-    public val winners : Set<UUID>
+    public val winners : List<UUID>
     
     /**
      * Constructor.
      * @param contest Completed contest
      * @param winners Winning agents
      */
-    public new(contest : AgentContest, winners : Set<UUID>)
+    public new(contest : AgentContest, winners : List<UUID>)
     {
         this.contest = contest
         this.winners = winners
