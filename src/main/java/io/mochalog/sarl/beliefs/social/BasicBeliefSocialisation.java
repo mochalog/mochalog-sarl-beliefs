@@ -236,7 +236,8 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
     
     @Override
     public AgentContest organiseContest(EventSpace space, Scope<Address> scope, 
-        BeliefQuery eligibilityQuery, long timeout, ExperimentEvaluator<AgentContestBallot> evaluator,
+        BeliefQuery eligibilityQuery, List<Object> prize, long timeout, 
+        ExperimentEvaluator<AgentContestBallot> evaluator,
         Function1<? super Set<UUID>, ? extends List<UUID>> winnerSelector)
     {
         return new AgentContestImpl.Executor()
@@ -244,6 +245,7 @@ public class BasicBeliefSocialisation extends Skill implements SocialBeliefs
             .setAccessPrincipal(principal)
             .addSurveys(eligibilityQuery)
             .setSurveyScope(scope)
+            .setPrize(prize)
             .setEvaluator(evaluator)
             .setWinnerSelector(winnerSelector)
             .endExperimentAfter(timeout)

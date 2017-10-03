@@ -18,10 +18,20 @@ package io.mochalog.sarl.beliefs.social.analysis.contest;
 
 import io.mochalog.sarl.beliefs.social.analysis.SocialExperiment;
 
+import java.util.List;
+
 /**
  * Interface for contests in which agents compete
  * for an arbitrary result.
  */
 public interface AgentContest extends SocialExperiment
 {
+    /**
+     * Get the prize to offer to winners of
+     * the contest. The prize comes in the form
+     * of a series of objects which can
+     * be fit to any given generic 'protocol'.
+     * @return Prize parameters
+     */
+    public List<Object> getPrize();
 }

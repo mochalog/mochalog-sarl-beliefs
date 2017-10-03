@@ -182,6 +182,7 @@ capacity SocialBeliefs
      * @param space Space to organise contest in
      * @param scope Scope of the contest
      * @param eligibilityQuery Query to assess entrant eligibility
+     * @param prize Parameters of prize to offer to contest winners
      * @param timeout Maximum contest duration in ms
      * @param evaluator Contest evaluation function (defaults to
      * assumption that positive responses are eligible)
@@ -190,7 +191,7 @@ capacity SocialBeliefs
      * @return Contest in progress
      */
     def organiseContest(^space : EventSpace, scope : Scope<Address> = null, 
-        eligibilityQuery : BeliefQuery, timeout : long = 2000, 
+        eligibilityQuery : BeliefQuery, prize : List<Object> = null, timeout : long = 2000, 
         evaluator : ExperimentEvaluator<AgentContestBallot> = null, 
         winnerSelector : (Set<UUID>) => List<UUID>) : AgentContest
 }

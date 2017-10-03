@@ -44,6 +44,9 @@ public final class AgentContestImpl extends AbstractSocialExperiment
     // set of eligible entrants
     private final Function1<? super Set<UUID>, ? extends List<UUID>> winnerSelector;
     
+    // Prize to offer to contest winners
+    private List<Object> prizeParams;
+    
     /**
      * Implementation of executor service for AgentContestImpl instances.
      */
@@ -52,6 +55,8 @@ public final class AgentContestImpl extends AbstractSocialExperiment
         // Function used by contest platform to determine contest winners
         // from eligible entrants
         private Function1<? super Set<UUID>, ? extends List<UUID>> winnerSelector;
+        // Prize to be offered to winners of the contest
+        private List<Object> prizeParams;
         
         /**
          * Constructor.
@@ -91,6 +96,18 @@ public final class AgentContestImpl extends AbstractSocialExperiment
             return this;
         }
         
+        /**
+         * Set prize to be offered to winning contest
+         * entrants.
+         * @param params Prize parameters
+         * @return Executor instance
+         */
+        public Executor setPrize(List<Object> params)
+        {
+            prizeParams = params;
+            return this;
+        }
+        
         @Override
         protected void onTimeout(AgentContestImpl contest)
         {
@@ -111,7 +128,16 @@ public final class AgentContestImpl extends AbstractSocialExperiment
                 return null;
             }
             
-            return new AgentContestImpl(space, evaluator, winnerSelector);
+            AgentContestImpl contest = new AgentContestImpl(space, evaluator, winnerSelector);
+            
+            // Ensure a contest prize was set given it was
+            // offered
+            if (prizeParams != null)
+            {
+                contest.setPrize(prizeParams);
+            }
+            
+            return contest;
         }
 
         @Override
@@ -135,6 +161,22 @@ public final class AgentContestImpl extends AbstractSocialExperiment
         
         this.evaluator = evaluator;
         this.winnerSelector = winnerSelector;
+    }
+    
+    @Override
+    public List<Object> getPrize()
+    {
+        return prizeParams;
+    }
+    
+    /**
+     * Set the prize to offer to winning entrants of
+     * the contest.
+     * @param params Parameters of the prize object
+     */
+    public void setPrize(List<Object> params)
+    {
+        prizeParams = params;
     }
 
     @Override
