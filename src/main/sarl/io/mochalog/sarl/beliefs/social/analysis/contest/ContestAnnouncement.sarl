@@ -20,24 +20,51 @@ import java.util.List
 import java.util.UUID
 
 /** 
- * Event announcing the result of a completed agent contest.
+ * Event announcing the result of a completed 
+ * or cancelled agent contest.
  */
 event ContestAnnouncement
 {
-    // Completed contest
+    // Contest in question (may be null
+    // to indicate contest was cancelled due
+    // to an unforseen precondition)
     public val contest : AgentContest
     // Identities of entrants who were selected
     // as contest winners
     public val winners : List<UUID>
+    // Prize being offered to winning entrants
+    public val prize : Object[]
     
     /**
-     * Constructor.
+     * Constructor. Indicates contest was cancelled.
+     * @param prize Prize to offer to winners
+     */
+    public new(prize : List<Object>)
+    {
+        this(null, #[], prize)
+    }
+    
+    /**
+     * Constructor. Indicates contest was successfully 
+     * completed.
      * @param contest Completed contest
      * @param winners Winning agents
      */
     public new(contest : AgentContest, winners : List<UUID>)
     {
+        this(contest, winners, contest.prize)
+    }
+    
+    /**
+     * Constructor.
+     * @param contest Contest instance
+     * @param winners Winning agents
+     * @param prize Prize to offer to winners
+     */
+    private new(contest : AgentContest, winners : List<UUID>, prize : List<Object>)
+    {
         this.contest = contest
         this.winners = winners
+        this.prize = prize
     }
 }
